@@ -1,13 +1,162 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import MainLayout from "@/components/layout/MainLayout";
+import CategoryFilter from "@/components/locations/CategoryFilter";
+import LocationGrid from "@/components/locations/LocationGrid";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
+import { categories, locations } from "@/data/mockData";
 
 const Index = () => {
+  const [filteredLocations, setFilteredLocations] = useState(locations);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const handleCategorySelect = (categoryId: string | null) => {
+    setSelectedCategory(categoryId);
+    
+    if (categoryId) {
+      setFilteredLocations(locations.filter(location => location.categoryId === categoryId));
+    } else {
+      setFilteredLocations(locations);
+    }
+  };
+  
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (searchQuery.trim() === "") {
+      if (selectedCategory) {
+        setFilteredLocations(locations.filter(location => location.categoryId === selectedCategory));
+      } else {
+        setFilteredLocations(locations);
+      }
+      return;
+    }
+    
+    const query = searchQuery.toLowerCase().trim();
+    const results = locations.filter(location => {
+      const matchesSearch = 
+        location.name.toLowerCase().includes(query) || 
+        location.address.toLowerCase().includes(query) ||
+        location.description.toLowerCase().includes(query);
+      
+      return selectedCategory 
+        ? matchesSearch && location.categoryId === selectedCategory
+        : matchesSearch;
+    });
+    
+    setFilteredLocations(results);
+  };
+  
+  // Featured categories - show only 3
+  const featuredCategories = categories.slice(0, 3);
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <MainLayout>
+      {/* Hero Section */}
+      <div className="relative bg-cluj-dark text-white">
+        <div 
+          className="absolute inset-0 overflow-hidden opacity-30"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1585211969224-3e992986159d?w=800&auto=format&fit=crop&q=60')",
+            backgroundSize: "cover",
+            backgroundPosition: "center"
+          }}
+        ></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl font-extrabold sm:text-5xl md:text-6xl mb-6">
+              Discover Cluj-Napoca
+            </h1>
+            <p className="text-xl mb-8">
+              Your ultimate guide to the best places in Cluj
+            </p>
+            
+            <form onSubmit={handleSearch} className="max-w-lg mx-auto">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search for restaurants, cafes, attractions..."
+                  className="w-full px-5 py-3 pr-12 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-cluj-primary"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="absolute right-2 top-2 p-1 rounded-full bg-cluj-primary text-white hover:bg-cluj-secondary"
+                >
+                  <Search className="h-5 w-5" />
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
-    </div>
+      
+      {/* Featured Categories */}
+      <div className="page-container">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="section-title">Featured Categories</h2>
+          <Link to="/categories">
+            <Button variant="outline">View All Categories</Button>
+          </Link>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {featuredCategories.map((category) => (
+            <Link key={category.id} to={`/categories/${category.slug}`}>
+              <div className="relative h-40 rounded-lg overflow-hidden shadow-md">
+                <img 
+                  src={category.imageUrl} 
+                  alt={category.name}
+                  className="h-full w-full object-cover transform transition-transform hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
+                  <h3 className="text-white text-lg font-medium">{category.name}</h3>
+                  <p className="text-white/80 text-sm">{category.count} locations</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+      
+      {/* Locations */}
+      <div className="page-container">
+        <h2 className="section-title">Explore Locations</h2>
+        
+        <CategoryFilter 
+          categories={categories} 
+          onCategorySelect={handleCategorySelect} 
+        />
+        
+        {filteredLocations.length > 0 ? (
+          <LocationGrid locations={filteredLocations} />
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-xl text-gray-600">No locations found. Try a different search.</p>
+          </div>
+        )}
+      </div>
+      
+      {/* CTA Section */}
+      <div className="bg-cluj-primary text-white mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold mb-4">Are You a Business Owner?</h2>
+            <p className="text-lg mb-8">
+              Add your business to Cluj Compass and reach more customers. It's quick and easy!
+            </p>
+            <Link to="/contact">
+              <Button variant="outline" className="text-white border-white hover:bg-white hover:text-cluj-primary">
+                Contact Us
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </MainLayout>
   );
 };
 
