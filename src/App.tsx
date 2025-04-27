@@ -17,6 +17,10 @@ import RegisterPage from "./pages/RegisterPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import NotFoundLocation from "./pages/NotFoundLocation";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminLocationForm from "./pages/AdminLocationForm";
+import BusinessClaim from "./pages/BusinessClaim";
+import MyBusinessDashboard from "./pages/MyBusinessDashboard";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +41,16 @@ const App = () => (
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/location-not-found" element={<NotFoundLocation />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/locations/add" element={<AdminLocationForm />} />
+            <Route path="/admin/locations/edit/:id" element={<AdminLocationForm />} />
+            
+            {/* Business Claiming & Management */}
+            <Route path="/location/:slug/claim" element={<BusinessClaim />} />
+            <Route path="/my-business" element={<MyBusinessDashboard />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
