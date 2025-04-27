@@ -14,6 +14,7 @@ export interface LocationCardProps {
   reviewCount: number;
   priceLevel: 1 | 2 | 3 | 4;
   isOpenNow?: boolean;
+  categoryId?: string; // Add this to match the data structure
 }
 
 const LocationCard = ({

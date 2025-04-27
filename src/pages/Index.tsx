@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import CategoryFilter from "@/components/locations/CategoryFilter";
 import LocationGrid from "@/components/locations/LocationGrid";
@@ -49,12 +49,10 @@ const Index = () => {
     setFilteredLocations(results);
   };
   
-  // Featured categories - show only 3
   const featuredCategories = categories.slice(0, 3);
   
   return (
     <MainLayout>
-      {/* Hero Section */}
       <div className="relative bg-cluj-dark text-white">
         <div 
           className="absolute inset-0 overflow-hidden opacity-30"
@@ -94,7 +92,6 @@ const Index = () => {
         </div>
       </div>
       
-      {/* Featured Categories */}
       <div className="page-container">
         <div className="flex justify-between items-center mb-6">
           <h2 className="section-title">Featured Categories</h2>
@@ -122,7 +119,6 @@ const Index = () => {
         </div>
       </div>
       
-      {/* Locations */}
       <div className="page-container">
         <h2 className="section-title">Explore Locations</h2>
         
@@ -140,7 +136,6 @@ const Index = () => {
         )}
       </div>
       
-      {/* CTA Section */}
       <div className="bg-cluj-primary text-white mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
           <div className="text-center max-w-3xl mx-auto">
