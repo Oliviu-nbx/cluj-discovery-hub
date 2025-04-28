@@ -67,14 +67,34 @@ export interface BusinessClaim {
   website: string;
 }
 
-// Ensure the mock locations match the Location interface
-const enhancedLocations: Location[] = locations.map(loc => ({
-  ...loc,
-  isClaimed: loc.claimedBy ? true : false,
-  priceLevel: (loc.priceLevel as any >= 1 && loc.priceLevel as any <= 4) 
+// Process mock data to make it match the Location interface
+const enhancedLocations: Location[] = locations.map(loc => {
+  // Convert potential openingHours object to array format required by Location interface
+  let formattedOpeningHours = Array.isArray(loc.openingHours) 
+    ? loc.openingHours 
+    : [
+        { day: "Monday", open: "09:00", close: "18:00" },
+        { day: "Tuesday", open: "09:00", close: "18:00" },
+        { day: "Wednesday", open: "09:00", close: "18:00" },
+        { day: "Thursday", open: "09:00", close: "18:00" },
+        { day: "Friday", open: "09:00", close: "18:00" },
+        { day: "Saturday", open: "10:00", close: "16:00" },
+        { day: "Sunday", open: "Closed", close: "Closed" }
+      ];
+
+  // Ensure priceLevel is within the allowed values
+  const validPriceLevel = (typeof loc.priceLevel === 'number' && loc.priceLevel >= 1 && loc.priceLevel <= 4) 
     ? loc.priceLevel as 1 | 2 | 3 | 4 
-    : 2 // Default to 2 if invalid
-}));
+    : 2; // Default to 2
+    
+  return {
+    ...loc,
+    openingHours: formattedOpeningHours,
+    priceLevel: validPriceLevel,
+    isClaimed: Boolean(loc.claimedBy || false),
+    reviews: loc.reviews || []
+  } as Location;
+});
 
 // Mock database (in a real app would be Supabase)
 let mockLocations: Location[] = [...enhancedLocations];
