@@ -67,8 +67,17 @@ export interface BusinessClaim {
   website: string;
 }
 
+// Ensure the mock locations match the Location interface
+const enhancedLocations: Location[] = locations.map(loc => ({
+  ...loc,
+  isClaimed: loc.claimedBy ? true : false,
+  priceLevel: (loc.priceLevel as any >= 1 && loc.priceLevel as any <= 4) 
+    ? loc.priceLevel as 1 | 2 | 3 | 4 
+    : 2 // Default to 2 if invalid
+}));
+
 // Mock database (in a real app would be Supabase)
-let mockLocations = [...locations];
+let mockLocations: Location[] = [...enhancedLocations];
 let mockCategories = [...categories];
 let mockBusinessClaims: BusinessClaim[] = [
   {
@@ -105,7 +114,7 @@ export const getLocationBySlug = async (slug: string): Promise<Location | null> 
   return mockLocations.find(loc => loc.slug === slug) || null;
 };
 
-export const createLocation = async (locationData: Omit<Location, "id" | "slug">): Promise<Location> => {
+export const createLocation = async (locationData: Omit<Location, "id" | "slug" | "isClaimed" | "reviews" | "reviewCount" | "rating">): Promise<Location> => {
   await delay(800);
   
   // Generate ID and slug
@@ -118,7 +127,8 @@ export const createLocation = async (locationData: Omit<Location, "id" | "slug">
     slug,
     reviewCount: 0,
     rating: 0,
-    isClaimed: false
+    isClaimed: false,
+    reviews: []
   };
   
   mockLocations = [...mockLocations, newLocation];
