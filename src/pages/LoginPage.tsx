@@ -1,35 +1,33 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/sonner";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      // This is a placeholder for Supabase integration
-      console.log("Login attempt:", { email, password });
-      
-      toast({
-        title: "Please connect Supabase",
-        description: "To implement authentication, please connect the application to Supabase.",
-      });
-      
-      setIsLoading(false);
-    }, 1000);
+    try {
+      await login(email, password);
+      // The redirect is handled in the login function
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    }
   };
   
   return (
@@ -89,9 +87,11 @@ const LoginPage = () => {
                 </div>
               </div>
               
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
+              <div className="pt-2">
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Logging in..." : "Login"}
+                </Button>
+              </div>
             </div>
           </form>
           
@@ -102,6 +102,15 @@ const LoginPage = () => {
                 Register
               </Link>
             </p>
+          </div>
+          
+          <div className="mt-8 p-4 bg-gray-50 rounded-md">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</h3>
+            <div className="text-xs text-gray-600 space-y-1">
+              <p>Admin: admin@clujcompass.com / admin123</p>
+              <p>User: user@example.com / password123</p>
+              <p>Business Owner: business@clujcafe.ro / business123</p>
+            </div>
           </div>
         </div>
       </div>

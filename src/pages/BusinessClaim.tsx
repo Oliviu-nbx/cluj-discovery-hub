@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import MainLayout from "@/components/layout/MainLayout";
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
 import { CheckIcon, Loader2 } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { getLocationBySlug, submitBusinessClaim } from "@/services/dataService";
 import {
   Card,
   CardContent,
@@ -25,20 +27,60 @@ import {
 const BusinessClaim = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [businessData, setBusinessData] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // This would be fetched from the database in a real app
-  const businessData = {
-    name: "Sample Business",
-    website: "https://example.com",
-    domain: "example.com",
-  };
+  useEffect(() => {
+    const fetchBusinessData = async () => {
+      if (!slug) return;
+      
+      try {
+        const data = await getLocationBySlug(slug);
+        if (!data) {
+          toast.error("Business not found");
+          navigate("/location-not-found");
+          return;
+        }
+        
+        if (data.isClaimed) {
+          toast.info("This business has already been claimed");
+          navigate(`/location/${slug}`);
+          return;
+        }
+        
+        // Extract domain from website if available
+        const websiteUrl = data.website || "";
+        const domain = websiteUrl.replace(/^https?:\/\//i, "").split('/')[0];
+        
+        setBusinessData({
+          ...data,
+          domain: domain || "example.com" // Fallback domain
+        });
+        
+      } catch (error) {
+        toast.error("Error loading business data");
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchBusinessData();
+  }, [slug, navigate]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    
+    if (!user || !businessData) {
+      toast.error("You must be logged in to claim a business");
+      setIsSubmitting(false);
+      return;
+    }
     
     // Validate email domain against business website
     const emailDomain = email.split('@')[1];
@@ -49,17 +91,58 @@ const BusinessClaim = () => {
     }
     
     try {
-      // In a real app, this would send a verification email through Supabase
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Submit claim
+      await submitBusinessClaim(
+        businessData.id,
+        user.id,
+        user.name || "Unknown User",
+        email,
+        businessData.website || `https://${businessData.domain}`
+      );
+      
       setVerificationSent(true);
       toast.success("Verification email sent!");
     } catch (error) {
-      console.error("Error sending verification:", error);
-      toast.error("There was an error sending the verification email");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("There was an error sending the verification");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+  
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-cluj-primary" />
+          <span className="ml-2">Loading business information...</span>
+        </div>
+      </MainLayout>
+    );
+  }
+  
+  if (!businessData) {
+    return (
+      <MainLayout>
+        <div className="page-container py-12">
+          <div className="max-w-lg mx-auto">
+            <Alert>
+              <AlertTitle>Business not found</AlertTitle>
+              <AlertDescription>
+                The business you are looking for does not exist or has been removed.
+              </AlertDescription>
+            </Alert>
+            <div className="mt-4 text-center">
+              <Button onClick={() => navigate("/")}>Back to Home</Button>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
   
   return (
     <MainLayout>
@@ -86,7 +169,7 @@ const BusinessClaim = () => {
                     <AlertTitle>Verification Required</AlertTitle>
                     <AlertDescription>
                       To claim this business, you must verify using an email address
-                      from the same domain as the business website ({businessData.website}).
+                      from the same domain as the business website ({businessData.domain}).
                     </AlertDescription>
                   </Alert>
                   

@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -11,20 +12,87 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Building, MapPin, User, Star } from "lucide-react";
+import { Building, MapPin, User, Star, Loader2 } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { getLocations, Location } from "@/services/dataService";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const MyBusinessDashboard = () => {
-  // In a real app, this would be fetched from the database
-  const businessData = {
-    name: "Cluj Cafe",
-    address: "123 Main Street, Cluj-Napoca",
-    category: "Cafe",
-    claimedAt: "2023-10-15",
-    rating: 4.7,
-    reviewCount: 128,
-    viewsThisMonth: 345,
-    clicks: 89
-  };
+  const { user } = useAuth();
+  const [business, setBusiness] = useState<Location | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [viewsThisMonth] = useState(345); // Mock data
+  const [clicks] = useState(89); // Mock data
+  
+  useEffect(() => {
+    const fetchBusinessData = async () => {
+      if (!user?.businessId) {
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        const locations = await getLocations();
+        const userBusiness = locations.find(loc => 
+          loc.isClaimed && loc.claimedBy === user.id
+        );
+        
+        if (userBusiness) {
+          setBusiness(userBusiness);
+        }
+      } catch (error) {
+        toast.error("Error loading business data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchBusinessData();
+  }, [user]);
+  
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-cluj-primary" />
+          <span className="ml-2">Loading business information...</span>
+        </div>
+      </MainLayout>
+    );
+  }
+  
+  if (!business) {
+    return (
+      <MainLayout>
+        <Helmet>
+          <title>My Business | Cluj Compass</title>
+          <meta name="description" content="Manage your business on Cluj Compass" />
+        </Helmet>
+        
+        <div className="page-container py-12">
+          <div className="max-w-md mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle>No Business Found</CardTitle>
+                <CardDescription>
+                  You haven't claimed any businesses yet.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p>To claim a business, visit the business page and click the "Claim this Business" button.</p>
+                <Button asChild className="w-full">
+                  <Link to="/categories">Browse Businesses</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
   
   return (
     <MainLayout>
@@ -36,15 +104,15 @@ const MyBusinessDashboard = () => {
       <div className="page-container py-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold">{businessData.name}</h1>
+            <h1 className="text-3xl font-bold">{business.name}</h1>
             <p className="text-muted-foreground flex items-center mt-1">
               <MapPin className="h-4 w-4 mr-1" />
-              {businessData.address}
+              {business.address}
             </p>
           </div>
           
           <Button asChild>
-            <Link to={`/location/${businessData.name.toLowerCase().replace(/\s+/g, '-')}/edit`}>
+            <Link to={`/location/${business.slug}/edit`}>
               Edit Business Profile
             </Link>
           </Button>
@@ -61,8 +129,8 @@ const MyBusinessDashboard = () => {
             <CardContent>
               <div className="flex items-center">
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 mr-2" />
-                <div className="text-2xl font-bold">{businessData.rating}</div>
-                <span className="text-muted-foreground ml-2">({businessData.reviewCount} reviews)</span>
+                <div className="text-2xl font-bold">{business.rating}</div>
+                <span className="text-muted-foreground ml-2">({business.reviewCount} reviews)</span>
               </div>
             </CardContent>
           </Card>
@@ -74,7 +142,7 @@ const MyBusinessDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{businessData.viewsThisMonth}</div>
+              <div className="text-2xl font-bold">{viewsThisMonth}</div>
               <p className="text-xs text-muted-foreground">This month</p>
             </CardContent>
           </Card>
@@ -86,7 +154,7 @@ const MyBusinessDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{businessData.clicks}</div>
+              <div className="text-2xl font-bold">{clicks}</div>
               <p className="text-xs text-muted-foreground">This month</p>
             </CardContent>
           </Card>
@@ -102,7 +170,7 @@ const MyBusinessDashboard = () => {
                 <div className="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
                 <span className="font-medium">Verified</span>
               </div>
-              <p className="text-xs text-muted-foreground">Claimed on {businessData.claimedAt}</p>
+              <p className="text-xs text-muted-foreground">Claimed on {new Date().toLocaleDateString()}</p>
             </CardContent>
           </Card>
         </div>
@@ -125,66 +193,189 @@ const MyBusinessDashboard = () => {
           </TabsList>
           
           <TabsContent value="profile">
-            <Card>
-              <CardHeader>
-                <CardTitle>Business Profile</CardTitle>
-                <CardDescription>
-                  Manage your business information and details
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Keep your business details up to date to attract more visitors.
-                </p>
-                
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Features coming soon:</p>
-                  <ul className="list-disc list-inside text-sm text-muted-foreground pl-4 space-y-1">
-                    <li>Update business hours</li>
-                    <li>Add special offers</li>
-                    <li>Upload additional photos</li>
-                    <li>Create events</li>
-                    <li>Edit amenities</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+            <BusinessProfileTab business={business} />
           </TabsContent>
           
           <TabsContent value="reviews">
-            <Card>
-              <CardHeader>
-                <CardTitle>Customer Reviews</CardTitle>
-                <CardDescription>
-                  View and respond to customer reviews
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Review management features coming soon.
-                </p>
-              </CardContent>
-            </Card>
+            <ReviewsTab business={business} />
           </TabsContent>
           
           <TabsContent value="insights">
-            <Card>
-              <CardHeader>
-                <CardTitle>Visitor Insights</CardTitle>
-                <CardDescription>
-                  Understand how visitors interact with your profile
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Detailed analytics coming soon.
-                </p>
-              </CardContent>
-            </Card>
+            <InsightsTab business={business} />
           </TabsContent>
         </Tabs>
       </div>
     </MainLayout>
+  );
+};
+
+// Business Profile Tab
+const BusinessProfileTab = ({ business }: { business: Location }) => {
+  const [description, setDescription] = useState(business.description);
+  const [isUpdating, setIsUpdating] = useState(false);
+  
+  const handleUpdateProfile = async () => {
+    setIsUpdating(true);
+    
+    // Mock API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    toast.success("Profile updated successfully");
+    setIsUpdating(false);
+  };
+  
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Business Information</CardTitle>
+          <CardDescription>
+            Update your business details
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="description">Business Description</Label>
+            <Textarea 
+              id="description" 
+              value={description} 
+              onChange={(e) => setDescription(e.target.value)}
+              rows={6}
+            />
+            <p className="text-xs text-muted-foreground">
+              Tell visitors about your business, services, and unique features
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input id="phone" defaultValue={business.phone} />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="website">Website</Label>
+              <Input id="website" defaultValue={business.website} />
+            </div>
+          </div>
+          
+          <Button onClick={handleUpdateProfile} disabled={isUpdating}>
+            {isUpdating ? "Updating..." : "Save Changes"}
+          </Button>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Business Hours</CardTitle>
+          <CardDescription>
+            Set your operating hours
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {business.openingHours.map((hour, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="font-medium w-24">{hour.day}</span>
+                <div className="flex items-center gap-2">
+                  <Input className="w-24" defaultValue={hour.open} />
+                  <span>to</span>
+                  <Input className="w-24" defaultValue={hour.close} />
+                </div>
+              </div>
+            ))}
+            
+            <Button className="mt-4">Save Hours</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+// Reviews Tab
+const ReviewsTab = ({ business }: { business: Location }) => {
+  const reviews = business.reviews || [];
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Customer Reviews</CardTitle>
+        <CardDescription>
+          View and respond to customer reviews
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {reviews.length > 0 ? (
+          <div className="space-y-6">
+            {reviews.map((review) => (
+              <div key={review.id} className="border-b pb-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{review.userName}</span>
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i}
+                            className={`h-4 w-4 ${i < review.rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(review.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-2">{review.text}</p>
+                <div className="mt-4">
+                  <Button variant="outline" size="sm">Reply</Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground">
+            No reviews yet. Reviews will appear here when customers leave feedback.
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+// Insights Tab
+const InsightsTab = ({ business }: { business: Location }) => {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Visitor Insights</CardTitle>
+        <CardDescription>
+          Understand how visitors interact with your profile
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          <div className="border rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Visitor Demographics</h3>
+            <p className="text-muted-foreground">
+              Detailed analytics will be available soon. Check back later for insights on your visitors.
+            </p>
+          </div>
+          
+          <div className="border rounded-lg p-6">
+            <h3 className="text-lg font-medium mb-4">Traffic Sources</h3>
+            <p className="text-muted-foreground">
+              Learn where your visitors are coming from to optimize your online presence.
+            </p>
+            <div className="mt-4">
+              <Button variant="outline">Enable Extended Analytics</Button>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

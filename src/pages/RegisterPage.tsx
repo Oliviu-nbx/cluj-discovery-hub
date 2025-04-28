@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/sonner";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -18,8 +19,7 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { register, isLoading } = useAuth();
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -30,37 +30,25 @@ const RegisterPage = () => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      });
+      toast.error("Passwords don't match");
       return;
     }
     
     if (!acceptTerms) {
-      toast({
-        title: "Terms and Conditions",
-        description: "Please accept the Terms and Conditions to continue.",
-        variant: "destructive",
-      });
+      toast.error("Please accept the Terms and Conditions to continue");
       return;
     }
     
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      // This is a placeholder for Supabase integration
-      console.log("Registration data:", formData);
-      
-      toast({
-        title: "Please connect Supabase",
-        description: "To implement authentication, please connect the application to Supabase.",
-      });
-      
-      setIsLoading(false);
-    }, 1000);
+    try {
+      await register(formData.email, formData.password, formData.fullName);
+      // Redirect is handled in the register function
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    }
   };
   
   return (
@@ -179,9 +167,11 @@ const RegisterPage = () => {
                 </label>
               </div>
               
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Registering..." : "Register"}
-              </Button>
+              <div className="pt-2">
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Registering..." : "Register"}
+                </Button>
+              </div>
             </div>
           </form>
           
