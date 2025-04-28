@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/sonner";
 import { categories, locations } from "@/data/mockData";
 
@@ -86,13 +85,25 @@ const enhancedLocations: Location[] = locations.map(loc => {
   const validPriceLevel = (typeof loc.priceLevel === 'number' && loc.priceLevel >= 1 && loc.priceLevel <= 4) 
     ? loc.priceLevel as 1 | 2 | 3 | 4 
     : 2; // Default to 2
+  
+  // Convert reviews to match the Review interface
+  const formattedReviews: Review[] = (loc.reviews || []).map(review => ({
+    id: review.id || `review-${Math.random().toString(36).substring(2, 9)}`,
+    userId: review.author?.toLowerCase().replace(/\s+/g, '-') || `user-${Math.random().toString(36).substring(2, 9)}`,
+    userName: review.author || 'Anonymous',
+    locationId: loc.id,
+    rating: review.rating,
+    text: review.text || '',
+    date: review.date || new Date().toISOString(),
+    helpful: 0
+  }));
     
   return {
     ...loc,
     openingHours: formattedOpeningHours,
     priceLevel: validPriceLevel,
-    isClaimed: Boolean(loc.claimedBy || false),
-    reviews: loc.reviews || []
+    isClaimed: Boolean(loc.claimedBy),
+    reviews: formattedReviews,
   } as Location;
 });
 
