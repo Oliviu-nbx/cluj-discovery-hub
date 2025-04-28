@@ -26,6 +26,15 @@ const MainLayout = ({
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
+        
+        {/* Prefetch important pages for faster navigation */}
+        <link rel="prefetch" href="/" />
+        <link rel="prefetch" href="/categories" />
+        <link rel="prefetch" href="/about" />
+        
+        {/* DNS prefetching for external resources */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
       </Helmet>
       <div className="flex flex-col min-h-screen">
         <Header />
