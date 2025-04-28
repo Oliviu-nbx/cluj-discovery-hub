@@ -1,3 +1,4 @@
+
 import { toast } from "@/components/ui/sonner";
 import { categories, locations } from "@/data/mockData";
 
@@ -98,11 +99,15 @@ const enhancedLocations: Location[] = locations.map(loc => {
     helpful: 0
   }));
     
+  // Handle the claimedBy property by using optional chaining and a type guard
+  const hasClaimedBy = 'claimedBy' in loc && loc.claimedBy !== undefined && loc.claimedBy !== null;
+
   return {
     ...loc,
     openingHours: formattedOpeningHours,
     priceLevel: validPriceLevel,
-    isClaimed: Boolean(loc.claimedBy),
+    isClaimed: hasClaimedBy,
+    claimedBy: hasClaimedBy ? loc.claimedBy as string : undefined,
     reviews: formattedReviews,
   } as Location;
 });
