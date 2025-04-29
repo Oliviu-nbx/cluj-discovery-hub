@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building, MapPin, Shield, Loader2, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   getLocations, 
   getBusinessClaimsByStatus, 
@@ -35,30 +36,31 @@ import {
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("locations");
+  const { t } = useLanguage();
   
   return (
     <MainLayout>
       <Helmet>
-        <title>Admin Dashboard | Cluj Compass</title>
+        <title>{t("admin.dashboard")} | Cluj Compass</title>
         <meta name="description" content="Admin dashboard for Cluj Compass" />
       </Helmet>
 
       <div className="page-container py-8">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-6">{t("admin.dashboard")}</h1>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-8">
             <TabsTrigger value="locations" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
-              <span>Locations</span>
+              <span>{t("admin.locations")}</span>
             </TabsTrigger>
             <TabsTrigger value="claims" className="flex items-center gap-2">
               <Building className="h-4 w-4" />
-              <span>Business Claims</span>
+              <span>{t("admin.claims")}</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
-              <span>Admin Settings</span>
+              <span>{t("admin.settings")}</span>
             </TabsTrigger>
           </TabsList>
           
@@ -86,6 +88,7 @@ const LocationsManagement = () => {
   const [locationToDelete, setLocationToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { t } = useLanguage();
   
   useEffect(() => {
     const fetchLocations = async () => {
@@ -125,9 +128,9 @@ const LocationsManagement = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Manage Locations</h2>
+        <h2 className="text-2xl font-semibold">{t("admin.locations")}</h2>
         <Link to="/admin/locations/add">
-          <Button>Add New Location</Button>
+          <Button>{t("admin.addLocation")}</Button>
         </Link>
       </div>
       
@@ -140,9 +143,9 @@ const LocationsManagement = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Address</TableHead>
+                <TableHead>{t("location.name")}</TableHead>
+                <TableHead>{t("location.category")}</TableHead>
+                <TableHead>{t("location.address")}</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Claimed</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -152,7 +155,7 @@ const LocationsManagement = () => {
               {locations.map((location) => (
                 <TableRow key={location.id}>
                   <TableCell className="font-medium">{location.name}</TableCell>
-                  <TableCell>{location.category}</TableCell>
+                  <TableCell>{t(`category.${location.category}`)}</TableCell>
                   <TableCell>{location.address}</TableCell>
                   <TableCell>
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -165,7 +168,7 @@ const LocationsManagement = () => {
                       to={`/admin/locations/edit/${location.id}`}
                       className="text-indigo-600 hover:text-indigo-900 mr-4"
                     >
-                      Edit
+                      {t("admin.editLocation")}
                     </Link>
                     <Button
                       variant="ghost"
@@ -175,7 +178,7 @@ const LocationsManagement = () => {
                         setDialogOpen(true);
                       }}
                     >
-                      Delete
+                      {t("admin.deleteLocation")}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -198,12 +201,12 @@ const LocationsManagement = () => {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this location? This action cannot be undone.
+              {t("admin.confirmDelete")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isDeleting}>
-              Cancel
+              {t("button.cancel")}
             </Button>
             <Button variant="destructive" onClick={handleDeleteLocation} disabled={isDeleting}>
               {isDeleting ? (
@@ -214,7 +217,7 @@ const LocationsManagement = () => {
               ) : (
                 <>
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  {t("button.delete")}
                 </>
               )}
             </Button>
@@ -230,6 +233,7 @@ const ClaimsManagement = () => {
   const [claims, setClaims] = useState<BusinessClaim[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [processingClaimId, setProcessingClaimId] = useState<string | null>(null);
+  const { t } = useLanguage();
   
   useEffect(() => {
     const fetchClaims = async () => {
@@ -271,7 +275,7 @@ const ClaimsManagement = () => {
   
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-6">Business Claim Requests</h2>
+      <h2 className="text-2xl font-semibold mb-6">{t("admin.claims")}</h2>
       
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
@@ -314,7 +318,7 @@ const ClaimsManagement = () => {
                       ) : (
                         <CheckCircle className="h-4 w-4 mr-1" />
                       )}
-                      Approve
+                      {t("button.approve")}
                     </Button>
                     <Button
                       variant="ghost"
@@ -327,7 +331,7 @@ const ClaimsManagement = () => {
                       ) : (
                         <XCircle className="h-4 w-4 mr-1" />
                       )}
-                      Reject
+                      {t("button.reject")}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -350,9 +354,11 @@ const ClaimsManagement = () => {
 
 // Admin Settings Tab Content
 const AdminSettings = () => {
+  const { t } = useLanguage();
+  
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-6">Admin Settings</h2>
+      <h2 className="text-2xl font-semibold mb-6">{t("admin.settings")}</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="border rounded-lg p-6">

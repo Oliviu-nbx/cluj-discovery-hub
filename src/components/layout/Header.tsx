@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Menu, X, MapPin, User, Heart, Calendar, Bus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -15,6 +17,7 @@ import { cn } from "@/lib/utils";
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useLanguage();
   
   // Placeholder for authentication status
   const isAuthenticated = false;
@@ -46,7 +49,7 @@ const Header = () => {
               <form onSubmit={handleSearchSubmit} className="relative">
                 <input
                   type="text"
-                  placeholder="Search locations..."
+                  placeholder={t("search.placeholder")}
                   className="pl-10 pr-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-cluj-primary focus:border-transparent w-64"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -58,14 +61,14 @@ const Header = () => {
             {/* Navigation links */}
             <nav className="flex space-x-4 items-center">
               <Link to="/" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100">
-                Home
+                {t("nav.home")}
               </Link>
 
               <NavigationMenu>
                 <NavigationMenuList>
                   <NavigationMenuItem>
                     <NavigationMenuTrigger className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100">
-                      Explore
+                      {t("nav.explore")}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] lg:w-[600px] lg:grid-cols-2">
@@ -75,17 +78,17 @@ const Header = () => {
                             className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-cluj-primary/50 to-cluj-primary p-6 no-underline outline-none focus:shadow-md"
                           >
                             <div className="mb-2 mt-4 text-lg font-medium text-white">
-                              Categories
+                              {t("categories.title")}
                             </div>
                             <p className="text-sm leading-tight text-white/90">
-                              Explore all categories including restaurants, cafes, attractions, and more.
+                              {t("nav.explore")}
                             </p>
                           </Link>
                         </li>
-                        <ListItem to="/events" title="Events" icon={<Calendar className="h-4 w-4 mr-2" />}>
+                        <ListItem to="/events" title={t("nav.events")} icon={<Calendar className="h-4 w-4 mr-2" />}>
                           Discover upcoming events, festivals, and happenings in Cluj-Napoca
                         </ListItem>
-                        <ListItem to="/transportation" title="Transportation" icon={<Bus className="h-4 w-4 mr-2" />}>
+                        <ListItem to="/transportation" title={t("nav.transportation")} icon={<Bus className="h-4 w-4 mr-2" />}>
                           Find information about public transportation options in the city
                         </ListItem>
                         <ListItem to="/categories/restaurants" title="Restaurants">
@@ -105,17 +108,19 @@ const Header = () => {
 
               <Link to="/events" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 flex items-center">
                 <Calendar className="h-4 w-4 mr-1" />
-                Events
+                {t("nav.events")}
               </Link>
               
               <Link to="/transportation" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 flex items-center">
                 <Bus className="h-4 w-4 mr-1" />
-                Transportation
+                {t("nav.transportation")}
               </Link>
               
               <Link to="/about" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100">
-                About
+                {t("nav.about")}
               </Link>
+              
+              <LanguageSwitcher className="ml-2" />
               
               {isAuthenticated ? (
                 <>
@@ -129,10 +134,10 @@ const Header = () => {
               ) : (
                 <>
                   <Link to="/login">
-                    <Button variant="outline" size="sm">Login</Button>
+                    <Button variant="outline" size="sm">{t("nav.login")}</Button>
                   </Link>
                   <Link to="/register">
-                    <Button size="sm">Register</Button>
+                    <Button size="sm">{t("nav.register")}</Button>
                   </Link>
                 </>
               )}
@@ -141,6 +146,7 @@ const Header = () => {
           
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
+            <LanguageSwitcher className="mr-2" />
             <button
               className="p-2 rounded-md hover:bg-gray-100"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -162,7 +168,7 @@ const Header = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search locations..."
+                  placeholder={t("search.placeholder")}
                   className="pl-10 pr-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-cluj-primary focus:border-transparent w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -177,14 +183,14 @@ const Header = () => {
               className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Home
+              {t("nav.home")}
             </Link>
             <Link 
               to="/categories" 
               className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Categories
+              {t("categories.title")}
             </Link>
             <Link 
               to="/events" 
@@ -192,7 +198,7 @@ const Header = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               <Calendar className="h-5 w-5 mr-2 text-cluj-primary" />
-              <span>Events</span>
+              <span>{t("nav.events")}</span>
             </Link>
             <Link 
               to="/transportation" 
@@ -200,14 +206,14 @@ const Header = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               <Bus className="h-5 w-5 mr-2 text-cluj-primary" />
-              <span>Transportation</span>
+              <span>{t("nav.transportation")}</span>
             </Link>
             <Link 
               to="/about" 
               className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100"
               onClick={() => setMobileMenuOpen(false)}
             >
-              About
+              {t("nav.about")}
             </Link>
             {isAuthenticated ? (
               <>
@@ -218,7 +224,7 @@ const Header = () => {
                 >
                   <div className="flex items-center">
                     <Heart className="h-5 w-5 mr-2 text-cluj-primary" />
-                    <span>Favorites</span>
+                    <span>{t("nav.favorites")}</span>
                   </div>
                 </Link>
                 <Link 
@@ -228,7 +234,7 @@ const Header = () => {
                 >
                   <div className="flex items-center">
                     <User className="h-5 w-5 mr-2 text-cluj-primary" />
-                    <span>Profile</span>
+                    <span>{t("nav.profile")}</span>
                   </div>
                 </Link>
               </>
@@ -238,13 +244,13 @@ const Header = () => {
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Button variant="outline" className="w-full">Login</Button>
+                  <Button variant="outline" className="w-full">{t("nav.login")}</Button>
                 </Link>
                 <Link 
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Button className="w-full">Register</Button>
+                  <Button className="w-full">{t("nav.register")}</Button>
                 </Link>
               </div>
             )}

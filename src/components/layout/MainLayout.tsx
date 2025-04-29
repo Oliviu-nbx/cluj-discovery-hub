@@ -2,6 +2,7 @@
 import { Helmet } from "react-helmet-async";
 import Header from "./Header";
 import Footer from "./Footer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,8 @@ const MainLayout = ({
   title = "Cluj Compass - Discover the Best Places in Cluj-Napoca", 
   description = "Explore the best restaurants, cafes, attractions, and more in Cluj-Napoca with Cluj Compass." 
 }: MainLayoutProps) => {
+  const { language } = useLanguage();
+  
   return (
     <>
       <Helmet>
@@ -26,6 +29,7 @@ const MainLayout = ({
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
+        <meta name="language" content={language} />
         
         {/* Prefetch important pages for faster navigation */}
         <link rel="prefetch" href="/" />
