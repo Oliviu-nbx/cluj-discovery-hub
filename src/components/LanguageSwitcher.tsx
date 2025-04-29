@@ -2,7 +2,7 @@
 import React from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
-import { languages } from "lucide-react";
+import { Languages } from "lucide-react";
 
 interface LanguageSwitcherProps {
   className?: string;
@@ -23,7 +23,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
       className={className}
       title={isRomanian ? "Switch to English" : "Schimbă în Română"}
     >
-      <languages className="h-4 w-4 mr-1" />
+      <Languages className="h-4 w-4 mr-1" />
       {isRomanian ? "RO" : "EN"}
     </Button>
   );
