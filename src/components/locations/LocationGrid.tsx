@@ -21,7 +21,10 @@ const LocationGrid = ({ locations }: LocationGridProps) => {
           reviewCount: location.reviewCount,
           priceLevel: location.priceLevel as 1 | 2 | 3 | 4,
           isOpenNow: location.isOpenNow,
-          categoryId: location.categoryId
+          categoryId: location.categoryId,
+          cuisine: location.cuisine,
+          hotelClass: location.hotelClass,
+          price: location.price
         };
         return <LocationCard key={location.id} {...locationProps} />;
       })}

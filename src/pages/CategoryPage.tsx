@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -7,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Filter } from "lucide-react";
 import { categories, locations } from "@/data/mockData";
+import { fetchAndUpdateLocations } from "@/services/dataService";
+import { toast } from "@/components/ui/sonner";
 
 const CategoryPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -14,6 +15,25 @@ const CategoryPage = () => {
   const [filteredLocations, setFilteredLocations] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [dataFetched, setDataFetched] = useState(false);
+  
+  // Fetch external data once when component mounts
+  useEffect(() => {
+    if (!dataFetched) {
+      const fetchData = async () => {
+        try {
+          await fetchAndUpdateLocations();
+          setDataFetched(true);
+        } catch (error) {
+          console.error("Error fetching external data:", error);
+          // Don't block the user experience if external data fetch fails
+          setDataFetched(true);
+        }
+      };
+      
+      fetchData();
+    }
+  }, [dataFetched]);
   
   // Fetch category and its locations
   useEffect(() => {
@@ -30,7 +50,7 @@ const CategoryPage = () => {
       console.error(`Category with slug "${slug}" not found`);
       setIsLoading(false);
     }
-  }, [slug]);
+  }, [slug, dataFetched]); // Also reload when external data is fetched
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

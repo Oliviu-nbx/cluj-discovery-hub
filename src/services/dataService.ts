@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/sonner";
 import { categories, locations } from "@/data/mockData";
 
@@ -12,7 +11,7 @@ export interface Location {
   address: string;
   description: string;
   imageUrl: string;
-  gallery?: string[];
+  photos?: string[];
   rating: number;
   reviewCount: number;
   priceLevel: 1 | 2 | 3 | 4;
@@ -31,6 +30,20 @@ export interface Location {
   latitude?: number;
   longitude?: number;
   reviews?: Review[];
+  cuisine?: string[];
+  features?: string[];
+  meals?: string[];
+  specialDiets?: string[];
+  price?: string;
+  rank?: string;
+  awards?: string[];
+  neighborhood?: string;
+  propertyAmenities?: string[];
+  roomFeatures?: string[];
+  roomTypes?: string[];
+  hotelClass?: string;
+  hotelStyle?: string;
+  languages?: string[];
 }
 
 export interface Category {
@@ -130,6 +143,119 @@ let mockBusinessClaims: BusinessClaim[] = [
     website: "clujcafe.ro"
   }
 ];
+
+// Function to fetch external data and merge it with our existing data
+export const fetchAndUpdateLocations = async (): Promise<void> => {
+  try {
+    const response = await fetch('https://api.apify.com/v2/datasets/8Z0o9BS1iBLzCzxZZ/items?clean=true&format=json');
+    if (!response.ok) {
+      throw new Error('Failed to fetch external data');
+    }
+    const externalData = await response.json();
+    
+    // Process and merge the data
+    const newLocations: Location[] = externalData.map((item: any) => {
+      // Generate a unique ID and slug
+      const id = `ext-${item.name?.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substring(2, 9)}`;
+      const slug = item.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || id;
+      
+      // Determine category
+      const category = item.type === 'restaurant' ? 'restaurants' : 
+                      (item.type === 'hotel' ? 'hotels' : 'attractions');
+      const categoryObj = mockCategories.find(cat => cat.slug === category);
+      
+      // Format opening hours
+      const defaultOpeningHours = [
+        { day: "Monday", open: "09:00", close: "23:00" },
+        { day: "Tuesday", open: "09:00", close: "23:00" },
+        { day: "Wednesday", open: "09:00", close: "23:00" },
+        { day: "Thursday", open: "09:00", close: "23:00" },
+        { day: "Friday", open: "09:00", close: "23:00" },
+        { day: "Saturday", open: "10:00", close: "23:00" },
+        { day: "Sunday", open: "10:00", close: "22:00" }
+      ];
+      
+      // Process reviews
+      const reviews = item.reviews?.map((review: any, index: number) => ({
+        id: `review-${id}-${index}`,
+        userId: `user-${Math.random().toString(36).substring(2, 9)}`,
+        userName: review.username || 'Anonymous',
+        locationId: id,
+        rating: review.rating || 4,
+        text: review.text || '',
+        date: review.date || new Date().toISOString(),
+        helpful: 0
+      })) || [];
+      
+      // Default image if none provided
+      const defaultImage = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D';
+      
+      // Create a location object from the external data
+      return {
+        id,
+        name: item.name || 'Unnamed Location',
+        slug,
+        category: item.type === 'restaurant' ? 'Restaurants' : 
+                (item.type === 'hotel' ? 'Hotels' : 'Attractions'),
+        categoryId: categoryObj?.id || 'category-1',
+        address: item.address || 'Cluj-Napoca, Romania',
+        description: item.description || item.about || '',
+        imageUrl: item.photo || defaultImage,
+        photos: item.photos || [defaultImage],
+        rating: item.rating || 4.0,
+        reviewCount: item.reviewCount || reviews.length || 0,
+        priceLevel: item.priceRange === '$$$$' ? 4 : 
+                    item.priceRange === '$$$' ? 3 : 
+                    item.priceRange === '$$' ? 2 : 1,
+        isOpenNow: true, // Default to open
+        website: item.website || '',
+        phone: item.phone || '+40 264 000 000',
+        email: item.email || '',
+        amenities: item.features || item.amenities || [],
+        openingHours: defaultOpeningHours,
+        isClaimed: false,
+        latitude: item.latitude,
+        longitude: item.longitude,
+        reviews,
+        cuisine: item.cuisine || [],
+        features: item.features || [],
+        meals: item.meals || [],
+        specialDiets: item.specialDiets || [],
+        price: item.price || item.priceRange || '',
+        rank: item.rank || '',
+        awards: item.awards || [],
+        neighborhood: item.neighborhood || 'Cluj-Napoca',
+        propertyAmenities: item.propertyAmenities || [],
+        roomFeatures: item.roomFeatures || [],
+        roomTypes: item.roomTypes || [],
+        hotelClass: item.hotelClass || '',
+        hotelStyle: item.hotelStyle || [],
+        languages: item.languages || ['Romanian', 'English']
+      } as Location;
+    });
+    
+    // Filter out any duplicates by name
+    const existingNames = new Set(mockLocations.map(loc => loc.name.toLowerCase()));
+    const uniqueNewLocations = newLocations.filter(loc => !existingNames.has(loc.name.toLowerCase()));
+    
+    // Update our mock database
+    mockLocations = [...mockLocations, ...uniqueNewLocations];
+    
+    // Update category counts
+    mockCategories = mockCategories.map(category => {
+      const count = mockLocations.filter(loc => 
+        loc.categoryId === category.id || 
+        (loc.category.toLowerCase() === category.slug)
+      ).length;
+      return { ...category, count };
+    });
+    
+    toast.success(`Added ${uniqueNewLocations.length} new locations from external data`);
+  } catch (error) {
+    console.error('Error fetching external data:', error);
+    toast.error('Failed to fetch external location data');
+  }
+};
 
 // Simulated API delays
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

@@ -15,6 +15,9 @@ export interface LocationCardProps {
   priceLevel: 1 | 2 | 3 | 4;
   isOpenNow?: boolean;
   categoryId?: string;
+  cuisine?: string[];
+  hotelClass?: string;
+  price?: string;
 }
 
 const categoryAccents: Record<string, { color: string; bgLight: string; icon: string }> = {
@@ -60,13 +63,32 @@ const LocationCard = ({
   rating,
   reviewCount,
   priceLevel,
-  isOpenNow
+  isOpenNow,
+  cuisine,
+  hotelClass,
+  price
 }: LocationCardProps) => {
-  const style = categoryAccents[category.toLowerCase()] || categoryAccents.default;
+  const categoryKey = category.toLowerCase();
+  const style = categoryAccents[categoryKey] || categoryAccents.default;
   
   const renderPriceLevel = () => {
-    const price = Array(priceLevel).fill("€").join("");
-    return <span className="text-gray-500 text-sm">{price}</span>;
+    if (price) return <span className="text-gray-500 text-sm">{price}</span>;
+    const priceSymbol = Array(priceLevel).fill("€").join("");
+    return <span className="text-gray-500 text-sm">{priceSymbol}</span>;
+  };
+
+  // Helper function to render stars for hotel class
+  const renderHotelClass = () => {
+    if (!hotelClass) return null;
+    const starCount = Number(hotelClass.charAt(0)) || 0;
+    
+    return (
+      <div className="flex items-center">
+        {Array(Math.floor(starCount)).fill(0).map((_, i) => (
+          <Star key={i} className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -109,8 +131,18 @@ const LocationCard = ({
             <span className="truncate">{address}</span>
           </div>
           
-          <div className="mt-2 flex justify-between items-center">
+          <div className="mt-3 flex justify-between items-center">
             {renderPriceLevel()}
+            
+            {/* Show cuisine for restaurants */}
+            {categoryKey === 'restaurants' && cuisine && cuisine.length > 0 && (
+              <div className="text-xs text-gray-500">
+                {cuisine.slice(0, 3).join(", ")}
+              </div>
+            )}
+            
+            {/* Show hotel class for hotels */}
+            {categoryKey === 'hotels' && renderHotelClass()}
           </div>
         </div>
       </div>
