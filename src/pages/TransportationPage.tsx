@@ -547,4 +547,380 @@ const TransportationPage = () => {
                   
                   <Card className="mb-4">
                     <CardHeader>
-                      <CardTitle>{t("transport.
+                      <CardTitle>{t("transport.intro.network")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {urbanNetworkInfo.vehicles.map((vehicle, index) => (
+                          <div key={index} className="flex items-start">
+                            <div className="bg-blue-100 p-2 rounded-full mr-3 mt-1">
+                              {vehicle.icon}
+                            </div>
+                            <div>
+                              <h4 className="font-medium capitalize">{vehicle.type}</h4>
+                              <p className="text-sm text-gray-600">
+                                {getLocalizedDescription(vehicle)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Line Numbering System */}
+                  <Card className="mb-4">
+                    <CardHeader>
+                      <CardTitle>{t("transport.intro.lineNumbers")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="mb-4 text-gray-700">
+                        {t("transport.intro.lineNumbersDesc")}
+                      </p>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>{t("transport.intro.suffix")}</TableHead>
+                            <TableHead>{t("transport.intro.meaning")}</TableHead>
+                            <TableHead>{t("transport.intro.description")}</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {suffixExplanations.map((suffix, index) => (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">{suffix.suffix}</TableCell>
+                              <TableCell>{suffix.meaning}</TableCell>
+                              <TableCell>
+                                {language === "ro" ? suffix.description : suffix.description_en}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                {/* Practical Information */}
+                <div className="mt-8">
+                  <h2 className="text-2xl font-semibold mb-4">{t("transport.practical.title")}</h2>
+                  
+                  <Accordion type="single" collapsible className="mb-6">
+                    {practicalRecommendations.map((rec, index) => (
+                      <AccordionItem key={index} value={`item-${index}`}>
+                        <AccordionTrigger className="text-left">
+                          {language === "ro" ? rec.title : rec.title_en}
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <p className="text-gray-700">
+                            {language === "ro" ? rec.description : rec.description_en}
+                          </p>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                  
+                  {/* Resources */}
+                  <h3 className="text-xl font-semibold mb-3">{t("transport.practical.resources")}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    {usefulResources.map((res, index) => (
+                      <div key={index} className="border rounded-md p-4">
+                        <h4 className="font-medium">{language === "ro" ? res.name : res.name_en}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{res.url}</p>
+                        <p className="text-sm text-gray-700 mt-2">
+                          {language === "ro" ? res.description : res.description_en}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Routes Tab */}
+          <TabsContent value="routes" className="animate-fade-in">
+            {/* Search and Filter */}
+            <div className="mb-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
+                <div className="relative w-full sm:w-96">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder={t("transport.routes.searchPlaceholder")}
+                    className="pl-10 pr-4 py-2 border rounded-md w-full"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button
+                    variant={activeRouteType === "all" ? "default" : "outline"}
+                    onClick={() => setActiveRouteType("all")}
+                    className="flex-1 sm:flex-auto"
+                  >
+                    {t("transport.routes.allRoutes")}
+                  </Button>
+                  <Button
+                    variant={activeRouteType === "bus" ? "default" : "outline"}
+                    onClick={() => setActiveRouteType("bus")}
+                    className="flex-1 sm:flex-auto"
+                  >
+                    <Bus className="h-4 w-4 mr-2" />
+                    {t("transport.routes.busRoutes")}
+                  </Button>
+                  <Button
+                    variant={activeRouteType === "tram" ? "default" : "outline"}
+                    onClick={() => setActiveRouteType("tram")}
+                    className="flex-1 sm:flex-auto"
+                  >
+                    <TramFront className="h-4 w-4 mr-2" />
+                    {t("transport.routes.tramRoutes")}
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Routes List */}
+            <div className="space-y-6">
+              {filteredRoutes.length > 0 ? (
+                filteredRoutes.map((route) => (
+                  <div key={route.id} className="border rounded-lg overflow-hidden bg-white">
+                    <div className={`p-4 text-white ${getRouteTypeColor(route.type)}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          {getRouteTypeIcon(route.type)}
+                          <span className="text-xl font-bold ml-2">
+                            {route.number}
+                          </span>
+                          <span className="ml-4 text-lg">
+                            {route.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1" />
+                            <span className="text-sm">{route.frequency}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <div className="mb-4">
+                        <h3 className="text-sm font-medium text-gray-500 mb-2">
+                          {t("transport.routes.schedule")}
+                        </h3>
+                        <div className="flex items-center">
+                          <Clock className="h-5 w-5 text-gray-600 mr-2" />
+                          <span>{route.schedule}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500 mb-2">
+                          {t("transport.routes.stops")}
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {route.stops.map((stop, index) => (
+                            <a
+                              key={index}
+                              href={`https://www.google.com/maps/search/?api=1&query=${stop.coords}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center p-2 rounded-md hover:bg-gray-100 transition"
+                            >
+                              <MapPin className="h-4 w-4 text-gray-500 mr-2" />
+                              <span>{stop.name}</span>
+                              <Map className="h-3 w-3 text-gray-500 ml-auto" />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center p-8 border rounded-lg bg-white">
+                  <AlertCircle className="h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-700 mb-2">
+                    {t("transport.routes.noRoutes")}
+                  </h3>
+                  <p className="text-center text-gray-500">
+                    {t("transport.routes.tryDifferent")}
+                  </p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Hubs Tab */}
+          <TabsContent value="hubs" className="animate-fade-in">
+            <div className="space-y-6">
+              {transportHubs.map((hub) => (
+                <div key={hub.id} className="border rounded-lg overflow-hidden bg-white">
+                  <div className="p-4 bg-gray-800 text-white">
+                    <div className="flex items-center">
+                      {getHubTypeIcon(hub.type)}
+                      <span className="text-xl font-bold ml-2">
+                        {hub.name}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="mb-4">
+                      <p className="text-gray-600">{hub.description}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500 mb-2">
+                          {t("transport.hubs.address")}
+                        </h3>
+                        <a 
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hub.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center"
+                        >
+                          <MapPin className="h-5 w-5 text-gray-600 mr-2" />
+                          <span>{hub.address}</span>
+                          <Map className="h-3 w-3 text-gray-500 ml-2" />
+                        </a>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500 mb-2">
+                          {t("transport.hubs.connections")}
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {hub.connections.map((connection, index) => (
+                            <Badge key={index} variant="outline">{connection}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <h3 className="text-sm font-medium text-gray-500 mb-2">
+                        {t("transport.hubs.facilities")}
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {hub.facilities.map((facility, index) => (
+                          <Badge key={index} variant="secondary">{facility}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+          
+          {/* Tariffs Tab */}
+          <TabsContent value="tariffs" className="animate-fade-in">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="mb-8">
+                <h2 className="text-2xl font-semibold mb-4">{t("transport.tariffs.title")}</h2>
+                
+                {/* Ticket Types */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold mb-4">{t("transport.tariffs.cardTypes")}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {ticketingInfo.cardTypes.map((card, index) => (
+                      <div key={index} className="border rounded-lg p-4">
+                        <h4 className="font-medium mb-2">{card.type}</h4>
+                        <p className="text-sm text-gray-600 mb-4">
+                          {language === "ro" ? card.description : card.description_en}
+                        </p>
+                        <ul className="list-disc list-inside space-y-1 text-sm">
+                          {(language === "ro" ? card.features : card.features_en).map((feature, i) => (
+                            <li key={i}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Payment Methods */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold mb-4">{t("transport.tariffs.paymentMethods")}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {ticketingInfo.paymentMethods.map((method, index) => (
+                      <div key={index} className="border rounded-lg p-4 flex flex-col">
+                        <div className="flex items-center mb-3">
+                          {method.icon}
+                          <h4 className="font-medium ml-2">{method.method}</h4>
+                        </div>
+                        <p className="text-sm text-gray-600 flex-grow">
+                          {language === "ro" ? method.description : method.description_en}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Urban Tariffs */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold mb-4">{t("transport.tariffs.urbanTariffs")}</h3>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>{t("transport.tariffs.ticketType")}</TableHead>
+                          <TableHead>{t("transport.tariffs.price")}</TableHead>
+                          <TableHead>{t("transport.tariffs.notes")}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {ticketingInfo.urbanTariffs.map((tariff, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{tariff.type}</TableCell>
+                            <TableCell>{tariff.price}</TableCell>
+                            <TableCell>
+                              {language === "ro" ? tariff.note : tariff.note_en}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+                
+                {/* Metropolitan Tariffs */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-4">{t("transport.tariffs.metropolitanTariffs")}</h3>
+                  <p className="text-gray-700 mb-4">
+                    {t("transport.tariffs.metropolitanDesc")}
+                  </p>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>{t("transport.tariffs.destination")}</TableHead>
+                          <TableHead>{t("transport.tariffs.lines")}</TableHead>
+                          <TableHead>{t("transport.tariffs.singleTicket")}</TableHead>
+                          <TableHead>{t("transport.tariffs.monthlyPass")}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {ticketingInfo.metropolitanSampleTariffs.map((tariff, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{tariff.destination}</TableCell>
+                            <TableCell>{tariff.lines}</TableCell>
+                            <TableCell>{tariff.ticket}</TableCell>
+                            <TableCell>{tariff.monthly}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </MainLayout>
+  );
+};
+
+export default TransportationPage;
