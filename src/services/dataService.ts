@@ -42,7 +42,7 @@ export interface Location {
   roomFeatures?: string[];
   roomTypes?: string[];
   hotelClass?: string;
-  hotelStyle?: string;
+  hotelStyle?: string[];
   languages?: string[];
 }
 
@@ -212,6 +212,9 @@ const extractLocationsFromXML = (xmlDoc: Document): Location[] => {
       ? parseFloat((reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount).toFixed(1))
       : parseFloat(getElementText("rating") || "4");
     
+    // Convert hotelStyle from string[] to string[] (this is where the error was)
+    const hotelStyleArray = getArrayFromElements("hotelStyle");
+    
     // Create location object
     const location: Location = {
       id,
@@ -259,7 +262,7 @@ const extractLocationsFromXML = (xmlDoc: Document): Location[] => {
       roomFeatures: getArrayFromElements("roomFeatures"),
       roomTypes: getArrayFromElements("roomTypes"),
       hotelClass: getElementText("hotelClass") || '',
-      hotelStyle: getArrayFromElements("hotelStyle"),
+      hotelStyle: hotelStyleArray, // Fixed: Now correctly passing the array
       languages: getArrayFromElements("languages").length > 0 ? getArrayFromElements("languages") : ['Romanian', 'English']
     };
     
