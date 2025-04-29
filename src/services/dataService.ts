@@ -144,6 +144,166 @@ let mockBusinessClaims: BusinessClaim[] = [
   }
 ];
 
+// Function to parse XML data
+const parseXML = (xmlText: string): Document => {
+  const parser = new DOMParser();
+  return parser.parseFromString(xmlText, "text/xml");
+};
+
+// Function to extract location data from XML
+const extractLocationsFromXML = (xmlDoc: Document): Location[] => {
+  const items = xmlDoc.querySelectorAll("item");
+  const locations: Location[] = [];
+
+  items.forEach((item) => {
+    // Helper function to get text content from an element
+    const getElementText = (elementName: string): string => {
+      const element = item.querySelector(elementName);
+      return element ? element.textContent || "" : "";
+    };
+
+    // Helper function to get array of values from elements
+    const getArrayFromElements = (elementName: string): string[] => {
+      const elements = item.querySelectorAll(elementName);
+      return Array.from(elements).map(el => el.textContent || "").filter(text => text.length > 0);
+    };
+
+    const name = getElementText("name");
+    if (!name) return; // Skip items without a name
+    
+    // Generate a unique ID and slug
+    const id = `xml-${name.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substring(2, 9)}`;
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    
+    // Determine category
+    const type = getElementText("type").toLowerCase();
+    const category = type.includes("restaurant") || type.includes("cafe") ? 'restaurants' : 
+                    type.includes("hotel") ? 'hotels' : 'attractions';
+    const categoryObj = mockCategories.find(cat => cat.slug === category);
+    
+    // Format photos
+    const photoUrl = getElementText("photo");
+    const photoUrls = getArrayFromElements("photos");
+    const allPhotos = photoUrl ? [photoUrl, ...photoUrls] : photoUrls.length > 0 ? photoUrls : ["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVzdGF1cmFudHxlbnwwfHwwfHx8MA%3D%3D"];
+    
+    // Process reviews
+    const reviewElements = item.querySelectorAll("reviews > review");
+    const reviews: Review[] = Array.from(reviewElements).map((reviewEl, index) => {
+      const reviewText = reviewEl.querySelector("text")?.textContent || "";
+      const reviewAuthor = reviewEl.querySelector("author")?.textContent || "Anonymous";
+      const reviewRating = parseFloat(reviewEl.querySelector("rating")?.textContent || "4");
+      const reviewDate = reviewEl.querySelector("date")?.textContent || new Date().toISOString();
+      
+      return {
+        id: `review-${id}-${index}`,
+        userId: `user-${reviewAuthor.toLowerCase().replace(/\s+/g, '-')}`,
+        userName: reviewAuthor,
+        locationId: id,
+        rating: reviewRating,
+        text: reviewText,
+        date: reviewDate,
+        helpful: 0
+      };
+    });
+    
+    // Calculate rating
+    const reviewCount = reviews.length;
+    const rating = reviewCount > 0 
+      ? parseFloat((reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount).toFixed(1))
+      : parseFloat(getElementText("rating") || "4");
+    
+    // Create location object
+    const location: Location = {
+      id,
+      name,
+      slug,
+      category: category === 'restaurants' ? 'Restaurants' : 
+              category === 'hotels' ? 'Hotels' : 'Attractions',
+      categoryId: categoryObj?.id || 'category-1',
+      address: getElementText("address") || 'Cluj-Napoca, Romania',
+      description: getElementText("description") || getElementText("about") || '',
+      imageUrl: allPhotos[0],
+      photos: allPhotos,
+      rating,
+      reviewCount: reviewCount || parseInt(getElementText("reviewCount") || "0"),
+      priceLevel: getElementText("priceRange") === '$$$$' ? 4 : 
+                getElementText("priceRange") === '$$$' ? 3 : 
+                getElementText("priceRange") === '$$' ? 2 : 1,
+      isOpenNow: true, // Default to open
+      website: getElementText("website") || '',
+      phone: getElementText("phone") || '+40 264 000 000',
+      email: getElementText("email") || '',
+      amenities: getArrayFromElements("amenities"),
+      openingHours: [
+        { day: "Monday", open: "09:00", close: "23:00" },
+        { day: "Tuesday", open: "09:00", close: "23:00" },
+        { day: "Wednesday", open: "09:00", close: "23:00" },
+        { day: "Thursday", open: "09:00", close: "23:00" },
+        { day: "Friday", open: "09:00", close: "23:00" },
+        { day: "Saturday", open: "10:00", close: "23:00" },
+        { day: "Sunday", open: "10:00", close: "22:00" }
+      ],
+      isClaimed: false,
+      latitude: parseFloat(getElementText("latitude") || "0"),
+      longitude: parseFloat(getElementText("longitude") || "0"),
+      reviews,
+      cuisine: getArrayFromElements("cuisine"),
+      features: getArrayFromElements("features"),
+      meals: getArrayFromElements("meals"),
+      specialDiets: getArrayFromElements("specialDiets"),
+      price: getElementText("price") || getElementText("priceRange") || '',
+      rank: getElementText("rank") || '',
+      awards: getArrayFromElements("awards"),
+      neighborhood: getElementText("neighborhood") || 'Cluj-Napoca',
+      propertyAmenities: getArrayFromElements("propertyAmenities"),
+      roomFeatures: getArrayFromElements("roomFeatures"),
+      roomTypes: getArrayFromElements("roomTypes"),
+      hotelClass: getElementText("hotelClass") || '',
+      hotelStyle: getArrayFromElements("hotelStyle"),
+      languages: getArrayFromElements("languages").length > 0 ? getArrayFromElements("languages") : ['Romanian', 'English']
+    };
+    
+    locations.push(location);
+  });
+
+  return locations;
+};
+
+// Function to fetch XML data from the GitHub repository
+export const fetchXMLLocations = async (): Promise<void> => {
+  try {
+    const response = await fetch('https://raw.githubusercontent.com/Oliviu-nbx/cluj-location-explorer/main/dataset_crawler-google-places_2025-04-29_07-32-12-890.xml');
+    if (!response.ok) {
+      throw new Error('Failed to fetch XML data');
+    }
+    
+    const xmlText = await response.text();
+    const xmlDoc = parseXML(xmlText);
+    const newLocations = extractLocationsFromXML(xmlDoc);
+    
+    // Filter out any duplicates by name
+    const existingNames = new Set(mockLocations.map(loc => loc.name.toLowerCase()));
+    const uniqueNewLocations = newLocations.filter(loc => !existingNames.has(loc.name.toLowerCase()));
+    
+    // Update our mock database
+    mockLocations = [...mockLocations, ...uniqueNewLocations];
+    
+    // Update category counts
+    mockCategories = mockCategories.map(category => {
+      const count = mockLocations.filter(loc => 
+        loc.categoryId === category.id || 
+        (loc.category.toLowerCase() === category.slug)
+      ).length;
+      return { ...category, count };
+    });
+    
+    toast.success(`Added ${uniqueNewLocations.length} new locations from XML data`);
+  } catch (error) {
+    console.error('Error fetching XML data:', error);
+    toast.error('Failed to fetch XML location data');
+  }
+};
+
 // Function to fetch external data and merge it with our existing data
 export const fetchAndUpdateLocations = async (): Promise<void> => {
   try {
