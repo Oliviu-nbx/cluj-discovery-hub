@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -5,8 +6,8 @@ import LocationGrid from "@/components/locations/LocationGrid";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Filter } from "lucide-react";
-import { categories, locations } from "@/data/mockData";
-import { fetchAndUpdateLocations } from "@/services/dataService";
+import { categories } from "@/data/mockData";
+import { fetchAndUpdateLocations, fetchXMLLocations, getLocationsByCategory } from "@/services/dataService";
 import { toast } from "@/components/ui/sonner";
 
 const CategoryPage = () => {
@@ -22,11 +23,15 @@ const CategoryPage = () => {
     if (!dataFetched) {
       const fetchData = async () => {
         try {
-          await fetchAndUpdateLocations();
+          // Fetch from both sources
+          await Promise.all([
+            fetchXMLLocations(),
+            fetchAndUpdateLocations()
+          ]);
           setDataFetched(true);
         } catch (error) {
-          console.error("Error fetching external data:", error);
-          // Don't block the user experience if external data fetch fails
+          console.error("Error fetching data:", error);
+          // Don't block the user experience if fetch fails
           setDataFetched(true);
         }
       };
@@ -42,9 +47,11 @@ const CategoryPage = () => {
     
     if (foundCategory) {
       setCategory(foundCategory);
-      const categoryLocations = locations.filter(loc => loc.categoryId === foundCategory.id);
-      setFilteredLocations(categoryLocations);
-      setIsLoading(false);
+      // Use the service function instead of direct filtering from mockData
+      getLocationsByCategory(foundCategory.id).then(categoryLocations => {
+        setFilteredLocations(categoryLocations);
+        setIsLoading(false);
+      });
     } else {
       // Handle category not found
       console.error(`Category with slug "${slug}" not found`);
@@ -58,22 +65,21 @@ const CategoryPage = () => {
     if (!category) return;
     
     if (searchQuery.trim() === "") {
-      const categoryLocations = locations.filter(loc => loc.categoryId === category.id);
-      setFilteredLocations(categoryLocations);
+      getLocationsByCategory(category.id).then(categoryLocations => {
+        setFilteredLocations(categoryLocations);
+      });
       return;
     }
     
     const query = searchQuery.toLowerCase().trim();
-    const results = locations.filter(location => {
-      const matchesSearch = 
+    getLocationsByCategory(category.id).then(categoryLocations => {
+      const results = categoryLocations.filter(location => 
         location.name.toLowerCase().includes(query) || 
         location.address.toLowerCase().includes(query) ||
-        location.description.toLowerCase().includes(query);
-      
-      return matchesSearch && location.categoryId === category.id;
+        location.description?.toLowerCase().includes(query)
+      );
+      setFilteredLocations(results);
     });
-    
-    setFilteredLocations(results);
   };
   
   if (isLoading) {
@@ -106,15 +112,15 @@ const CategoryPage = () => {
   
   return (
     <MainLayout
-      title={`${category.name} in Cluj-Napoca - Cluj Compass`}
-      description={`Discover the best ${category.name.toLowerCase()} in Cluj-Napoca. Browse ratings, reviews, and find the perfect spots to visit.`}
+      title={`${category?.name} in Cluj-Napoca - Cluj Compass`}
+      description={`Discover the best ${category?.name.toLowerCase()} in Cluj-Napoca. Browse ratings, reviews, and find the perfect spots to visit.`}
     >
       {/* Category Header */}
       <div className="relative bg-cluj-dark text-white">
         <div 
           className="absolute inset-0 overflow-hidden opacity-30"
           style={{
-            backgroundImage: `url('${category.imageUrl}')`,
+            backgroundImage: `url('${category?.imageUrl}')`,
             backgroundSize: "cover",
             backgroundPosition: "center"
           }}
@@ -122,13 +128,13 @@ const CategoryPage = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="md:w-2/3">
             <h1 className="text-3xl font-bold sm:text-4xl mb-4">
-              {category.name} in Cluj-Napoca
+              {category?.name} in Cluj-Napoca
             </h1>
             <p className="text-lg mb-6">
-              Discover the best {category.name.toLowerCase()} in Cluj-Napoca
+              Discover the best {category?.name.toLowerCase()} in Cluj-Napoca
             </p>
             <div className="text-sm">
-              <span>{category.count} locations</span>
+              <span>{category?.count} locations</span>
             </div>
           </div>
         </div>
@@ -142,7 +148,7 @@ const CategoryPage = () => {
             <div className="relative flex-grow">
               <Input
                 type="text"
-                placeholder={`Search ${category.name.toLowerCase()}...`}
+                placeholder={`Search ${category?.name.toLowerCase()}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"

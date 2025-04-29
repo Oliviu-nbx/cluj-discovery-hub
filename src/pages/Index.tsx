@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -7,7 +6,7 @@ import LocationGrid from "@/components/locations/LocationGrid";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { getLocations, getCategories } from "@/services/dataService";
+import { getLocations, getCategories, fetchXMLLocations } from "@/services/dataService";
 
 const Index = () => {
   const [filteredLocations, setFilteredLocations] = useState<any[]>([]);
@@ -24,6 +23,10 @@ const Index = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        // First, fetch XML data to ensure we have the latest locations
+        await fetchXMLLocations();
+        
+        // Then get all the locations and categories
         const [locationsData, categoriesData] = await Promise.all([
           getLocations(),
           getCategories()

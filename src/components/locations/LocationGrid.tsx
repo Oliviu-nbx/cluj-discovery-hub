@@ -1,8 +1,9 @@
 
 import LocationCard, { LocationCardProps } from "./LocationCard";
+import { Location } from "@/services/dataService";
 
 interface LocationGridProps {
-  locations: any[]; // Use any[] temporarily to accept the mock data
+  locations: Location[]; // Use the proper Location type from dataService
 }
 
 const LocationGrid = ({ locations }: LocationGridProps) => {

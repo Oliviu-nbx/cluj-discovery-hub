@@ -3,9 +3,16 @@ import MainLayout from "@/components/layout/MainLayout";
 import CategoryGrid from "@/components/categories/CategoryGrid";
 import { categories } from "@/data/mockData";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect } from "react";
+import { fetchXMLLocations } from "@/services/dataService";
 
 const CategoriesPage = () => {
   const { t } = useLanguage();
+  
+  useEffect(() => {
+    // Fetch XML locations data when the component mounts
+    fetchXMLLocations();
+  }, []);
   
   return (
     <MainLayout
