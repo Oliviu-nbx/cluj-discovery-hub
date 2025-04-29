@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Bus, 
   TramFront, 
-  TrainFront, 
   Map, 
   Clock, 
   Search, 
@@ -40,7 +40,14 @@ const busRoutes = [
     id: "bus1",
     number: "24B",
     name: "Bucium - Mănăștur",
-    stops: ["Bucium", "Calea Turzii", "Piața Mihai Viteazu", "Piața Mărăști", "Strada Izlazului", "Mănăștur"],
+    stops: [
+      { name: "Bucium", coords: "46.7488,23.5644" },
+      { name: "Calea Turzii", coords: "46.7611,23.5907" },
+      { name: "Piața Mihai Viteazu", coords: "46.7704,23.5889" },
+      { name: "Piața Mărăști", coords: "46.7764,23.6126" },
+      { name: "Strada Izlazului", coords: "46.7584,23.5464" },
+      { name: "Mănăștur", coords: "46.7543,23.5509" }
+    ],
     schedule: "5:30 - 23:00",
     frequency: "Every 10-12 minutes",
     type: "bus"
@@ -49,7 +56,12 @@ const busRoutes = [
     id: "bus2",
     number: "30",
     name: "Aeroport - Piața Gării",
-    stops: ["Aeroport", "Strada Traian Vuia", "Mărăști", "Piața Gării"],
+    stops: [
+      { name: "Aeroport", coords: "46.7849,23.6863" },
+      { name: "Strada Traian Vuia", coords: "46.7931,23.6674" },
+      { name: "Mărăști", coords: "46.7764,23.6126" },
+      { name: "Piața Gării", coords: "46.7723,23.5722" }
+    ],
     schedule: "5:00 - 23:30",
     frequency: "Every 15 minutes",
     type: "bus"
@@ -58,7 +70,13 @@ const busRoutes = [
     id: "bus3",
     number: "5",
     name: "Piața Mihai Viteazu - Florești",
-    stops: ["Piața Mihai Viteazu", "Opera Maghiară", "Str. Horea", "Piața 1 Mai", "Florești"],
+    stops: [
+      { name: "Piața Mihai Viteazu", coords: "46.7704,23.5889" },
+      { name: "Opera Maghiară", coords: "46.7688,23.5837" },
+      { name: "Str. Horea", coords: "46.7717,23.5806" },
+      { name: "Piața 1 Mai", coords: "46.7702,23.5613" },
+      { name: "Florești", coords: "46.7481,23.4861" }
+    ],
     schedule: "5:15 - 23:15",
     frequency: "Every 8-10 minutes",
     type: "bus"
@@ -67,7 +85,12 @@ const busRoutes = [
     id: "tram1",
     number: "101",
     name: "Mănăștur - Piața Gării",
-    stops: ["Mănăștur", "Piața Cipariu", "Piața Avram Iancu", "Piața Gării"],
+    stops: [
+      { name: "Mănăștur", coords: "46.7543,23.5509" },
+      { name: "Piața Cipariu", coords: "46.7729,23.5925" },
+      { name: "Piața Avram Iancu", coords: "46.7714,23.5958" },
+      { name: "Piața Gării", coords: "46.7723,23.5722" }
+    ],
     schedule: "5:00 - 23:00",
     frequency: "Every 12 minutes",
     type: "tram"
@@ -76,20 +99,99 @@ const busRoutes = [
     id: "tram2",
     number: "102",
     name: "Bucium - Piața Gării",
-    stops: ["Bucium", "Iulius Mall", "Piața Mărăști", "Piața Gării"],
+    stops: [
+      { name: "Bucium", coords: "46.7488,23.5644" },
+      { name: "Iulius Mall", coords: "46.7740,23.6230" },
+      { name: "Piața Mărăști", coords: "46.7764,23.6126" },
+      { name: "Piața Gării", coords: "46.7723,23.5722" }
+    ],
     schedule: "5:30 - 22:30",
     frequency: "Every 15 minutes",
     type: "tram"
   },
   {
-    id: "metro1",
-    number: "M1",
-    name: "Florești - Mănăștur - Centru - Mărăști (Under Construction)",
-    stops: ["Florești", "Mănăștur", "Piața Unirii", "Centru", "Piața Mărăști"],
-    schedule: "Expected completion 2026",
-    frequency: "Planned: Every 7 minutes",
-    type: "metro",
-    status: "planned"
+    id: "bus4",
+    number: "25",
+    name: "Piața Mihai Viteazu - Gheorgheni",
+    stops: [
+      { name: "Piața Mihai Viteazu", coords: "46.7704,23.5889" },
+      { name: "Piața Cipariu", coords: "46.7729,23.5925" },
+      { name: "Iulius Mall", coords: "46.7740,23.6230" },
+      { name: "Gheorgheni", coords: "46.7645,23.6235" }
+    ],
+    schedule: "5:15 - 22:45",
+    frequency: "Every 12 minutes",
+    type: "bus"
+  },
+  {
+    id: "bus5",
+    number: "35",
+    name: "Piața Gării - Zorilor",
+    stops: [
+      { name: "Piața Gării", coords: "46.7723,23.5722" },
+      { name: "Memorandumului", coords: "46.7681,23.5799" },
+      { name: "Universitatea Babeș-Bolyai", coords: "46.7658,23.5870" },
+      { name: "Zorilor", coords: "46.7571,23.5861" }
+    ],
+    schedule: "5:30 - 22:30",
+    frequency: "Every 15 minutes",
+    type: "bus"
+  },
+  {
+    id: "bus6",
+    number: "46",
+    name: "Piața Ștefan cel Mare - Europa",
+    stops: [
+      { name: "Piața Ștefan cel Mare", coords: "46.7699,23.5863" },
+      { name: "Piața Cipariu", coords: "46.7729,23.5925" },
+      { name: "Strada Eugen Ionesco", coords: "46.7543,23.5747" },
+      { name: "Cartier Europa", coords: "46.7466,23.5733" }
+    ],
+    schedule: "5:20 - 22:40",
+    frequency: "Every 15 minutes",
+    type: "bus"
+  },
+  {
+    id: "tram3",
+    number: "100",
+    name: "Piața Gării - Bd. Muncii",
+    stops: [
+      { name: "Piața Gării", coords: "46.7723,23.5722" },
+      { name: "Piața Libertății", coords: "46.7701,23.5891" },
+      { name: "Piața Unirii", coords: "46.7687,23.5897" },
+      { name: "Bd. Muncii", coords: "46.7966,23.6304" }
+    ],
+    schedule: "5:10 - 22:50",
+    frequency: "Every 12 minutes",
+    type: "tram"
+  },
+  {
+    id: "bus7",
+    number: "31",
+    name: "Piața Mihai Viteazu - Baciu",
+    stops: [
+      { name: "Piața Mihai Viteazu", coords: "46.7704,23.5889" },
+      { name: "Memorandumului", coords: "46.7681,23.5799" },
+      { name: "Calea Baciului", coords: "46.7861,23.5417" },
+      { name: "Baciu", coords: "46.7959,23.5197" }
+    ],
+    schedule: "5:15 - 22:30",
+    frequency: "Every 20 minutes",
+    type: "bus"
+  },
+  {
+    id: "bus8",
+    number: "8",
+    name: "Piața Mihai Viteazu - Aeroport",
+    stops: [
+      { name: "Piața Mihai Viteazu", coords: "46.7704,23.5889" },
+      { name: "Piața Mărăști", coords: "46.7764,23.6126" },
+      { name: "Strada Traian Vuia", coords: "46.7931,23.6674" },
+      { name: "Aeroport", coords: "46.7849,23.6863" }
+    ],
+    schedule: "5:00 - 22:45",
+    frequency: "Every 15 minutes",
+    type: "bus"
   }
 ];
 
@@ -346,7 +448,7 @@ const TransportationPage = () => {
     const matchesSearch = 
       route.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
       route.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      route.stops.some(stop => stop.toLowerCase().includes(searchTerm.toLowerCase()));
+      route.stops.some(stop => stop.name.toLowerCase().includes(searchTerm.toLowerCase()));
     
     if (activeRouteType === "all") return matchesSearch;
     return route.type === activeRouteType && matchesSearch;
@@ -356,7 +458,6 @@ const TransportationPage = () => {
     switch(type) {
       case "bus": return <Bus className="h-5 w-5" />;
       case "tram": return <TramFront className="h-5 w-5" />;
-      case "metro": return <TrainFront className="h-5 w-5" />;
       default: return <Bus className="h-5 w-5" />;
     }
   };
@@ -365,14 +466,13 @@ const TransportationPage = () => {
     switch(type) {
       case "bus": return "bg-blue-500 hover:bg-blue-600";
       case "tram": return "bg-green-500 hover:bg-green-600";
-      case "metro": return "bg-red-500 hover:bg-red-600";
       default: return "bg-gray-500 hover:bg-gray-600";
     }
   };
   
   const getHubTypeIcon = (type: string) => {
     switch(type) {
-      case "train": return <TrainFront className="h-5 w-5" />;
+      case "train": return <TramFront className="h-5 w-5" />;
       case "airport": return <Bus className="h-5 w-5" />;
       case "bus": return <Bus className="h-5 w-5" />;
       default: return <Map className="h-5 w-5" />;
@@ -628,14 +728,6 @@ const TransportationPage = () => {
                     <TramFront className="h-4 w-4" />
                     {isRomanian ? "Tramvaie" : "Trams"}
                   </Button>
-                  <Button 
-                    variant={activeRouteType === "metro" ? "default" : "outline"}
-                    onClick={() => setActiveRouteType("metro")}
-                    className="flex gap-2 items-center"
-                  >
-                    <TrainFront className="h-4 w-4" />
-                    {isRomanian ? "Metrou" : "Metro"}
-                  </Button>
                 </div>
               </div>
               
@@ -656,19 +748,12 @@ const TransportationPage = () => {
                                 {isRomanian 
                                   ? route.type === "bus" 
                                     ? "Autobuz" 
-                                    : route.type === "tram" 
-                                      ? "Tramvai" 
-                                      : "Metrou"
+                                    : "Tramvai"
                                   : route.type.charAt(0).toUpperCase() + route.type.slice(1)
                                 }
                               </span>
                             </Badge>
                             <div className="text-2xl font-bold text-gray-800">{route.number}</div>
-                            {route.status === "planned" && (
-                              <Badge variant="outline" className="mt-2 text-yellow-600 border-yellow-300 bg-yellow-50">
-                                {isRomanian ? "Planificat" : "Planned"}
-                              </Badge>
-                            )}
                           </div>
                         </div>
                         <div className="p-6 md:w-5/6">
@@ -678,7 +763,15 @@ const TransportationPage = () => {
                             {route.stops.map((stop, index) => (
                               <div key={index} className="flex items-center">
                                 {index > 0 && <div className="h-px w-4 bg-gray-300 mx-1"></div>}
-                                <span className="text-sm py-1 px-2 bg-gray-100 rounded-md">{stop}</span>
+                                <a 
+                                  href={`https://www.google.com/maps?q=${stop.coords}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm py-1 px-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-1"
+                                >
+                                  <MapPin className="h-3 w-3 text-cluj-primary" />
+                                  {stop.name}
+                                </a>
                               </div>
                             ))}
                           </div>
