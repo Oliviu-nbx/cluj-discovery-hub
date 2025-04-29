@@ -1,8 +1,17 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Menu, X, MapPin, User, Heart } from "lucide-react";
+import { Search, Menu, X, MapPin, User, Heart, Calendar, Bus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -52,9 +61,59 @@ const Header = () => {
               <Link to="/" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100">
                 Home
               </Link>
-              <Link to="/categories" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100">
-                Categories
+
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100">
+                      Explore
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] lg:w-[600px] lg:grid-cols-2">
+                        <li className="row-span-3">
+                          <Link
+                            to="/categories"
+                            className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-cluj-primary/50 to-cluj-primary p-6 no-underline outline-none focus:shadow-md"
+                          >
+                            <div className="mb-2 mt-4 text-lg font-medium text-white">
+                              Categories
+                            </div>
+                            <p className="text-sm leading-tight text-white/90">
+                              Explore all categories including restaurants, cafes, attractions, and more.
+                            </p>
+                          </Link>
+                        </li>
+                        <ListItem to="/events" title="Events" icon={<Calendar className="h-4 w-4 mr-2" />}>
+                          Discover upcoming events, festivals, and happenings in Cluj-Napoca
+                        </ListItem>
+                        <ListItem to="/transportation" title="Transportation" icon={<Bus className="h-4 w-4 mr-2" />}>
+                          Find information about public transportation options in the city
+                        </ListItem>
+                        <ListItem to="/categories/restaurants" title="Restaurants">
+                          Explore the best dining options in Cluj-Napoca
+                        </ListItem>
+                        <ListItem to="/categories/cafes" title="Cafes">
+                          Discover coffee shops and cafes around the city
+                        </ListItem>
+                        <ListItem to="/categories/attractions" title="Attractions">
+                          Find popular attractions and landmarks
+                        </ListItem>
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+
+              <Link to="/events" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 flex items-center">
+                <Calendar className="h-4 w-4 mr-1" />
+                Events
               </Link>
+              
+              <Link to="/transportation" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100 flex items-center">
+                <Bus className="h-4 w-4 mr-1" />
+                Transportation
+              </Link>
+              
               <Link to="/about" className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-100">
                 About
               </Link>
@@ -129,6 +188,22 @@ const Header = () => {
               Categories
             </Link>
             <Link 
+              to="/events" 
+              className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100 flex items-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Calendar className="h-5 w-5 mr-2 text-cluj-primary" />
+              <span>Events</span>
+            </Link>
+            <Link 
+              to="/transportation" 
+              className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100 flex items-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Bus className="h-5 w-5 mr-2 text-cluj-primary" />
+              <span>Transportation</span>
+            </Link>
+            <Link 
               to="/about" 
               className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100"
               onClick={() => setMobileMenuOpen(false)}
@@ -180,5 +255,38 @@ const Header = () => {
     </header>
   );
 };
+
+const ListItem = React.forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a"> & {
+    to: string;
+    title: string;
+    icon?: React.ReactNode;
+  }
+>(({ className, title, children, icon, to, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <Link
+          ref={ref}
+          to={to}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none flex items-center">
+            {icon && icon} {title}
+          </div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </Link>
+      </NavigationMenuLink>
+    </li>
+  );
+});
+ListItem.displayName = "ListItem";
 
 export default Header;

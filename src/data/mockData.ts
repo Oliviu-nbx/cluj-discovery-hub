@@ -1,4 +1,3 @@
-
 // Mock Categories
 export const categories = [
   {
@@ -42,6 +41,34 @@ export const categories = [
     slug: "hotels",
     imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=60",
     count: 12
+  },
+  {
+    id: "7",
+    name: "Malls",
+    slug: "malls",
+    imageUrl: "https://images.unsplash.com/photo-1496307653780-42ee777d4833?w=800&auto=format&fit=crop&q=60",
+    count: 4
+  },
+  {
+    id: "8",
+    name: "Gyms",
+    slug: "gyms",
+    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=60",
+    count: 6
+  },
+  {
+    id: "9",
+    name: "Libraries",
+    slug: "libraries",
+    imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60",
+    count: 3
+  },
+  {
+    id: "10",
+    name: "Bakeries",
+    slug: "bakeries",
+    imageUrl: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=800&auto=format&fit=crop&q=60",
+    count: 7
   }
 ];
 

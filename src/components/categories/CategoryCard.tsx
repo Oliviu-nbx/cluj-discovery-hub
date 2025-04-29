@@ -31,6 +31,26 @@ const categoryStyles: Record<string, { gradient: string; hover: string }> = {
     gradient: "from-green-500/80 to-emerald-500/80",
     hover: "group-hover:shadow-green-500/25",
   },
+  malls: {
+    gradient: "from-pink-400/80 to-rose-500/80",
+    hover: "group-hover:shadow-pink-500/25",
+  },
+  gyms: {
+    gradient: "from-red-500/80 to-orange-400/80",
+    hover: "group-hover:shadow-red-500/25",
+  },
+  libraries: {
+    gradient: "from-indigo-500/80 to-blue-400/80",
+    hover: "group-hover:shadow-indigo-500/25",
+  },
+  bakeries: {
+    gradient: "from-amber-400/80 to-yellow-300/80",
+    hover: "group-hover:shadow-amber-500/25",
+  },
+  museums: {
+    gradient: "from-slate-600/80 to-slate-400/80",
+    hover: "group-hover:shadow-slate-500/25",
+  },
   default: {
     gradient: "from-cluj-primary/80 to-cluj-secondary/80",
     hover: "group-hover:shadow-cluj-primary/25",

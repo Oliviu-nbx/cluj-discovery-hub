@@ -101,6 +101,47 @@
   .image-hover {
     @apply transition-transform duration-300 hover:scale-105;
   }
+  
+  /* Category-specific styles */
+  .category-restaurants {
+    @apply from-orange-500/80 to-pink-500/80;
+  }
+  
+  .category-cafes {
+    @apply from-amber-500/80 to-yellow-500/80;
+  }
+  
+  .category-hotels {
+    @apply from-purple-500/80 to-violet-500/80;
+  }
+  
+  .category-attractions {
+    @apply from-blue-500/80 to-cyan-500/80;
+  }
+  
+  .category-parks {
+    @apply from-green-500/80 to-emerald-500/80;
+  }
+  
+  .category-malls {
+    @apply from-pink-400/80 to-rose-500/80;
+  }
+  
+  .category-gyms {
+    @apply from-red-500/80 to-orange-400/80;
+  }
+  
+  .category-libraries {
+    @apply from-indigo-500/80 to-blue-400/80;
+  }
+  
+  .category-bakeries {
+    @apply from-amber-400/80 to-yellow-300/80;
+  }
+  
+  .category-museums {
+    @apply from-slate-600/80 to-slate-400/80;
+  }
 }
 
 @keyframes fadeInUp {

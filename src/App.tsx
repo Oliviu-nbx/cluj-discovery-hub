@@ -25,6 +25,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminLocationForm from "./pages/AdminLocationForm";
 import BusinessClaim from "./pages/BusinessClaim";
 import MyBusinessDashboard from "./pages/MyBusinessDashboard";
+import EventsPage from "./pages/EventsPage";
+import TransportationPage from "./pages/TransportationPage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,8 @@ const App = () => (
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/location-not-found" element={<NotFoundLocation />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/transportation" element={<TransportationPage />} />
               
               {/* Protected Routes - Admin Only */}
               <Route 
