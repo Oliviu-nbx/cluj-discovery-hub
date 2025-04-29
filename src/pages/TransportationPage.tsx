@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Badge } from "@/components/ui/badge";
@@ -479,10 +478,18 @@ const TransportationPage = () => {
     }
   };
 
+  const getLocalizedDescription = (item: any) => {
+    return language === "ro" ? item.description : item.description_en;
+  };
+
+  const getLocalizedText = (roText: string, enText: string) => {
+    return language === "ro" ? roText : enText;
+  };
+
   return (
     <MainLayout
-      title={isRomanian ? "Transport Public în Cluj-Napoca - Cluj Compass" : "Public Transportation in Cluj-Napoca - Cluj Compass"}
-      description={isRomanian ? "Informații despre autobuze, tramvaie și opțiuni de transport în Cluj-Napoca." : "Find information about buses, trams, and transportation options in Cluj-Napoca."}
+      title={t("transport.title") + " - Cluj Compass"}
+      description={t("transport.subtitle")}
     >
       {/* Hero Section */}
       <div className="relative bg-cluj-dark text-white">
@@ -497,12 +504,10 @@ const TransportationPage = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="md:w-2/3">
             <h1 className="text-3xl font-bold sm:text-4xl mb-4">
-              {isRomanian ? "Transport Public în Cluj-Napoca" : "Public Transportation in Cluj-Napoca"}
+              {t("transport.title")}
             </h1>
             <p className="text-lg mb-6">
-              {isRomanian 
-                ? "Ghid complet al transportului public CTP în Cluj-Napoca și zona metropolitană" 
-                : "Complete guide to CTP public transportation in Cluj-Napoca and the metropolitan area"}
+              {t("transport.subtitle")}
             </p>
           </div>
         </div>
@@ -513,19 +518,19 @@ const TransportationPage = () => {
           <TabsList className="mb-8">
             <TabsTrigger value="guide" className="flex gap-2 items-center">
               <Info className="h-4 w-4" />
-              {isRomanian ? "Ghid CTP" : "CTP Guide"}
+              {t("transport.tab.guide")}
             </TabsTrigger>
             <TabsTrigger value="routes" className="flex gap-2 items-center">
               <Bus className="h-4 w-4" />
-              {isRomanian ? "Rute" : "Routes"}
+              {t("transport.tab.routes")}
             </TabsTrigger>
             <TabsTrigger value="hubs" className="flex gap-2 items-center">
               <Map className="h-4 w-4" />
-              {isRomanian ? "Noduri de Transport" : "Transport Hubs"}
+              {t("transport.tab.hubs")}
             </TabsTrigger>
             <TabsTrigger value="tariffs" className="flex gap-2 items-center">
               <CreditCard className="h-4 w-4" />
-              {isRomanian ? "Tarife și Ticketing" : "Fares & Ticketing"}
+              {t("transport.tab.tariffs")}
             </TabsTrigger>
           </TabsList>
           
@@ -535,472 +540,11 @@ const TransportationPage = () => {
               <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                 {/* Introduction */}
                 <div className="mb-8">
-                  <h2 className="text-2xl font-semibold mb-4">{isRomanian ? "Introducere" : "Introduction"}</h2>
+                  <h2 className="text-2xl font-semibold mb-4">{t("transport.intro.title")}</h2>
                   <p className="mb-4 text-gray-700">
-                    {isRomanian 
-                      ? "Acest ghid servește ca o resursă detaliată pentru utilizarea sistemului de transport public din Cluj-Napoca și zona sa metropolitană. Scopul este de a centraliza informații esențiale despre operator, rețeaua de rute (urbane și metropolitane), tipurile de vehicule, modalitățile de achiziționare a titlurilor de călătorie și tarifele actualizate." 
-                      : "This guide serves as a detailed resource for using the public transportation system in Cluj-Napoca and its metropolitan area. The aim is to centralize essential information about the operator, route network (urban and metropolitan), types of vehicles, methods of purchasing tickets, and updated fares."}
+                    {t("transport.intro.text")}
                   </p>
                   
                   <Card className="mb-4">
                     <CardHeader>
-                      <CardTitle>{isRomanian ? "Operatorul de Transport" : "Transport Operator"}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-700">
-                        {isRomanian 
-                          ? "Compania de Transport Public (CTP) Cluj-Napoca S.A., cunoscută anterior sub numele de RATUC, este operatorul oficial și principalul furnizor de servicii de transport public de persoane în municipiul Cluj-Napoca și în Zona Metropolitană Cluj." 
-                          : "Compania de Transport Public (CTP) Cluj-Napoca S.A., formerly known as RATUC, is the official operator and main provider of public passenger transport services in Cluj-Napoca and the Cluj Metropolitan Area."}
-                      </p>
-                      <div className="flex flex-wrap gap-2 mt-4">
-                        <Badge variant="outline">
-                          <a href="http://www.ctpcj.ro" target="_blank" rel="noopener noreferrer">www.ctpcj.ro</a>
-                        </Badge>
-                        <Badge variant="outline">
-                          <span>{isRomanian ? "Tel: 0264-430917" : "Phone: 0264-430917"}</span>
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                {/* Urban Network Overview */}
-                <div className="mb-8">
-                  <h2 className="text-2xl font-semibold mb-4">{isRomanian ? "Rețeaua de Transport Urban" : "Urban Transport Network"}</h2>
-                  <p className="mb-6 text-gray-700">
-                    {isRomanian 
-                      ? "CTP Cluj-Napoca operează o rețea extinsă și complexă în interiorul municipiului, conectând eficient cartierele rezidențiale, zonele industriale, centrele comerciale, instituțiile de învățământ și alte puncte de interes major." 
-                      : "CTP Cluj-Napoca operates an extensive and complex network within the city, efficiently connecting residential neighborhoods, industrial zones, shopping centers, educational institutions, and other major points of interest."}
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    {urbanNetworkInfo.vehicles.map((vehicle, index) => (
-                      <Card key={index}>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            {vehicle.icon}
-                            <span>{isRomanian ? vehicle.type.charAt(0).toUpperCase() + vehicle.type.slice(1) : vehicle.type.charAt(0).toUpperCase() + vehicle.type.slice(1)}</span>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-gray-700">
-                            {isRomanian ? vehicle.description : vehicle.description_en}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                  
-                  {/* Line Suffix Explanation */}
-                  <div className="mt-8">
-                    <h3 className="text-xl font-medium mb-4">{isRomanian ? "Semnificația Sufixelor Liniilor Urbane" : "Urban Line Suffix Meanings"}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {suffixExplanations.map((suffix, index) => (
-                        <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge>{suffix.suffix}</Badge>
-                            <span className="font-medium">{suffix.meaning}</span>
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            {isRomanian ? suffix.description : suffix.description_en}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Metropolitan Network */}
-                <div className="mb-8">
-                  <h2 className="text-2xl font-semibold mb-4">{isRomanian ? "Rețeaua de Transport Metropolitan" : "Metropolitan Transport Network"}</h2>
-                  <p className="mb-4 text-gray-700">
-                    {isRomanian 
-                      ? "Pe lângă rețeaua urbană, CTP Cluj-Napoca joacă un rol esențial în conectarea municipiului cu localitățile învecinate din cadrul Zonei Metropolitane Cluj. Acest serviciu este vital pentru miile de persoane care locuiesc în comunele periurbane și lucrează, studiază sau accesează servicii în Cluj-Napoca." 
-                      : "In addition to the urban network, CTP Cluj-Napoca plays an essential role in connecting the city with neighboring localities within the Cluj Metropolitan Area. This service is vital for thousands of people who live in suburban communes and work, study, or access services in Cluj-Napoca."}
-                  </p>
-                  
-                  <Card className="mb-6">
-                    <CardHeader>
-                      <CardTitle>{isRomanian ? "Comunele Deservite" : "Served Communes"}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2">
-                        {["Florești", "Baciu", "Apahida", "Chinteni", "Feleacu", "Gilău", "Ciurila", "Aiton", "Petreștii de Jos", "Săvădisla"].map((commune, index) => (
-                          <Badge key={index} variant="outline" className="bg-gray-50">{commune}</Badge>
-                        ))}
-                      </div>
-                      <p className="mt-4 text-sm text-gray-600">
-                        {isRomanian 
-                          ? "Lista este în continuă extindere pe măsură ce noi localități se alătură rețelei metropolitane." 
-                          : "The list is continuously expanding as new localities join the metropolitan network."}
-                      </p>
-                    </CardContent>
-                  </Card>
-                  
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <AlertCircle className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm text-yellow-700">
-                          {isRomanian 
-                            ? "Tarifele pentru liniile metropolitane nu sunt uniforme, ci sunt stabilite în urma negocierilor dintre CTP și fiecare Unitate Administrativ-Teritorială (UAT - primăria comunei) deservită. Fiecare UAT decide nivelul de compensație pe care îl acordă CTP pentru operarea serviciului pe teritoriul său și, implicit, politica tarifară aplicată călătorilor din comuna respectivă." 
-                            : "Fares for metropolitan lines are not uniform but are established following negotiations between CTP and each served Administrative-Territorial Unit (ATU - commune hall). Each ATU decides the level of compensation it provides to CTP for operating the service on its territory and, implicitly, the tariff policy applied to passengers from that commune."}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Practical Recommendations */}
-                <div>
-                  <h2 className="text-2xl font-semibold mb-4">{isRomanian ? "Recomandări Practice" : "Practical Recommendations"}</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {practicalRecommendations.map((rec, index) => (
-                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="font-medium mb-2">{isRomanian ? rec.title : rec.title_en}</h3>
-                        <p className="text-sm text-gray-600">
-                          {isRomanian ? rec.description : rec.description_en}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-8">
-                    <h3 className="text-xl font-medium mb-4">{isRomanian ? "Resurse Utile" : "Useful Resources"}</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {usefulResources.map((resource, index) => (
-                        <Card key={index} className="bg-gray-50">
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-base">{isRomanian ? resource.name : resource.name_en}</CardTitle>
-                          </CardHeader>
-                          <CardContent className="pt-0">
-                            <p className="text-sm text-gray-600 mb-2">{resource.url}</p>
-                            <p className="text-xs text-gray-500">
-                              {isRomanian ? resource.description : resource.description_en}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-          
-          {/* Routes Tab */}
-          <TabsContent value="routes" className="animate-fade-in">
-            <div className="mb-8">
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="relative flex-grow">
-                  <input
-                    type="text"
-                    placeholder={isRomanian ? "Caută rute, stații..." : "Search routes, stops..."}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-cluj-primary"
-                  />
-                  <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button 
-                    variant={activeRouteType === "all" ? "default" : "outline"}
-                    onClick={() => setActiveRouteType("all")}
-                  >
-                    {isRomanian ? "Toate" : "All"}
-                  </Button>
-                  <Button 
-                    variant={activeRouteType === "bus" ? "default" : "outline"}
-                    onClick={() => setActiveRouteType("bus")}
-                    className="flex gap-2 items-center"
-                  >
-                    <Bus className="h-4 w-4" />
-                    {isRomanian ? "Autobuze" : "Buses"}
-                  </Button>
-                  <Button 
-                    variant={activeRouteType === "tram" ? "default" : "outline"}
-                    onClick={() => setActiveRouteType("tram")}
-                    className="flex gap-2 items-center"
-                  >
-                    <TramFront className="h-4 w-4" />
-                    {isRomanian ? "Tramvaie" : "Trams"}
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Routes List */}
-              <div className="space-y-4">
-                {filteredRoutes.length > 0 ? (
-                  filteredRoutes.map((route) => (
-                    <div 
-                      key={route.id} 
-                      className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden animate-fade-in"
-                    >
-                      <div className="flex flex-col md:flex-row">
-                        <div className="md:w-1/6 flex items-center justify-center p-6 bg-gray-50">
-                          <div className="flex flex-col items-center">
-                            <Badge className={`${getRouteTypeColor(route.type)} mb-2 flex gap-1 items-center px-3 py-1`}>
-                              {getRouteTypeIcon(route.type)}
-                              <span>
-                                {isRomanian 
-                                  ? route.type === "bus" 
-                                    ? "Autobuz" 
-                                    : "Tramvai"
-                                  : route.type.charAt(0).toUpperCase() + route.type.slice(1)
-                                }
-                              </span>
-                            </Badge>
-                            <div className="text-2xl font-bold text-gray-800">{route.number}</div>
-                          </div>
-                        </div>
-                        <div className="p-6 md:w-5/6">
-                          <h3 className="font-semibold text-lg mb-3">{route.name}</h3>
-                          
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {route.stops.map((stop, index) => (
-                              <div key={index} className="flex items-center">
-                                {index > 0 && <div className="h-px w-4 bg-gray-300 mx-1"></div>}
-                                <a 
-                                  href={`https://www.google.com/maps?q=${stop.coords}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm py-1 px-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-1"
-                                >
-                                  <MapPin className="h-3 w-3 text-cluj-primary" />
-                                  {stop.name}
-                                </a>
-                              </div>
-                            ))}
-                          </div>
-                          
-                          <div className="flex flex-col sm:flex-row gap-4 text-sm text-gray-600">
-                            <div className="flex items-center">
-                              <Clock className="h-4 w-4 mr-2 text-cluj-primary" />
-                              <span>{isRomanian ? "Program: " : "Schedule: "}{route.schedule}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Bus className="h-4 w-4 mr-2 text-cluj-primary" />
-                              <span>
-                                {isRomanian ? "Frecvență: " : "Frequency: "}
-                                {route.frequency}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-xl text-gray-600 mb-4">
-                      {isRomanian 
-                        ? "Nu s-au găsit rute care să corespundă criteriilor tale." 
-                        : "No routes found matching your criteria."}
-                    </p>
-                    <Button onClick={() => {setSearchTerm(''); setActiveRouteType('all');}}>
-                      {isRomanian ? "Vezi Toate Rutele" : "View All Routes"}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="hubs" className="animate-fade-in">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {transportHubs.map((hub) => (
-                <div 
-                  key={hub.id}
-                  className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden transition-shadow hover:shadow-lg"
-                >
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <h3 className="font-semibold text-lg">{hub.name}</h3>
-                      <div className="bg-cluj-primary/10 p-2 rounded-full">
-                        {getHubTypeIcon(hub.type)}
-                      </div>
-                    </div>
-                    
-                    <p className="text-gray-600 text-sm mb-4">{hub.description}</p>
-                    
-                    <div className="text-sm mb-4">
-                      <div className="font-medium text-gray-800 mb-1">{isRomanian ? "Adresă:" : "Address:"}</div>
-                      <div className="text-gray-600">{hub.address}</div>
-                    </div>
-                    
-                    <div className="text-sm mb-4">
-                      <div className="font-medium text-gray-800 mb-1">{isRomanian ? "Facilități:" : "Facilities:"}</div>
-                      <div className="flex flex-wrap gap-2">
-                        {hub.facilities.map((facility, index) => (
-                          <Badge key={index} variant="outline" className="bg-gray-50">
-                            {facility}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="text-sm">
-                      <div className="font-medium text-gray-800 mb-1">{isRomanian ? "Conexiuni:" : "Connections:"}</div>
-                      <div className="flex flex-wrap gap-2">
-                        {hub.connections.map((connection, index) => (
-                          <Badge key={index} variant="secondary" className="bg-cluj-primary/10 text-cluj-primary">
-                            {connection}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="tariffs" className="animate-fade-in">
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-              <h2 className="text-2xl font-semibold mb-6">{isRomanian ? "Tarife și Ticketing" : "Fares & Ticketing"}</h2>
-              
-              <div className="space-y-8">
-                {/* ConnectCluj Card */}
-                <div>
-                  <h3 className="text-xl font-medium mb-4">
-                    {isRomanian ? "Cardul de Călătorie ConnectCluj" : "ConnectCluj Travel Card"}
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                    {ticketingInfo.cardTypes.map((card, index) => (
-                      <Card key={index}>
-                        <CardHeader>
-                          <CardTitle>{card.type}</CardTitle>
-                          <CardDescription>
-                            {isRomanian ? card.description : card.description_en}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
-                            {(isRomanian ? card.features : card.features_en).map((feature, idx) => (
-                              <li key={idx}>{feature}</li>
-                            ))}
-                          </ul>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Payment Methods */}
-                <div>
-                  <h3 className="text-xl font-medium mb-4">
-                    {isRomanian ? "Metode de Plată și Achiziție a Titlurilor de Călătorie" : "Payment Methods and Ticket Purchase"}
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                    {ticketingInfo.paymentMethods.map((method, index) => (
-                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                        <div className="flex items-center gap-2 mb-2">
-                          {method.icon}
-                          <span className="font-medium">{method.method}</span>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          {isRomanian ? method.description : method.description_en}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Urban Tariffs */}
-                <div>
-                  <h3 className="text-xl font-medium mb-3">{isRomanian ? "Tarife Urbane" : "Urban Fares"}</h3>
-                  
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableCaption>
-                        {isRomanian 
-                          ? "Tarifele prezentate sunt cele cunoscute la momentul redactării (1 Iulie 2022). Verificați www.ctpcj.ro pentru tarifele curente." 
-                          : "The tariffs presented are those known at the time of writing (July 1, 2022). Check www.ctpcj.ro for current tariffs."}
-                      </TableCaption>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{isRomanian ? "Tip Bilet / Abonament" : "Ticket / Subscription Type"}</TableHead>
-                          <TableHead>{isRomanian ? "Preț (Lei)" : "Price (Lei)"}</TableHead>
-                          <TableHead>{isRomanian ? "Observații" : "Notes"}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {ticketingInfo.urbanTariffs.map((tariff, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-medium">{tariff.type}</TableCell>
-                            <TableCell>{tariff.price}</TableCell>
-                            <TableCell className="text-sm text-gray-600">{isRomanian ? tariff.note : tariff.note_en}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-                
-                {/* Metropolitan Tariffs */}
-                <div>
-                  <h3 className="text-xl font-medium mb-3">{isRomanian ? "Tarife Metropolitane (Selecție)" : "Metropolitan Fares (Selection)"}</h3>
-                  
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableCaption>
-                        {isRomanian 
-                          ? "Tarifele pentru transportul metropolitan variază în funcție de comună și distanță. Acestea sunt stabilite în colaborare cu UAT-urile locale." 
-                          : "Metropolitan transport fares vary depending on the commune and distance. They are established in collaboration with local ATUs."}
-                      </TableCaption>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{isRomanian ? "Destinație / Comuna" : "Destination / Commune"}</TableHead>
-                          <TableHead>{isRomanian ? "Linii" : "Lines"}</TableHead>
-                          <TableHead>{isRomanian ? "Preț Bilet (Lei)" : "Ticket Price (Lei)"}</TableHead>
-                          <TableHead>{isRomanian ? "Abonament Lunar (Lei)" : "Monthly Pass (Lei)"}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {ticketingInfo.metropolitanSampleTariffs.map((tariff, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-medium">{tariff.destination}</TableCell>
-                            <TableCell>{tariff.lines}</TableCell>
-                            <TableCell>{tariff.ticket}</TableCell>
-                            <TableCell>{tariff.monthly}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                  
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <h4 className="font-medium mb-2">{isRomanian ? "Gratuități și Reduceri" : "Free and Discounted Travel"}</h4>
-                    <p className="text-sm text-gray-700 mb-2">
-                      {isRomanian 
-                        ? "CTP Cluj-Napoca acordă facilități la transport (gratuități sau reduceri) pentru anumite categorii socio-profesionale, conform legislației în vigoare și hotărârilor locale." 
-                        : "CTP Cluj-Napoca provides transport facilities (free or reduced fares) for certain socio-professional categories, according to current legislation and local decisions."}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        isRomanian ? "Elevi" : "Students", 
-                        isRomanian ? "Studenți" : "University students", 
-                        isRomanian ? "Pensionari" : "Pensioners", 
-                        isRomanian ? "Donatori de sânge" : "Blood donors", 
-                        isRomanian ? "Persoane cu dizabilități" : "People with disabilities"
-                      ].map((category, index) => (
-                        <Badge key={index} variant="outline">{category}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </MainLayout>
-  );
-};
-
-export default TransportationPage;
+                      <CardTitle>{t("transport.
