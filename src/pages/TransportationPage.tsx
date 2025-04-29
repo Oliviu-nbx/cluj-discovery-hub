@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +14,7 @@ import {
   Info, 
   CreditCard, 
   MapPin,
-  Navigation,
-  Directions
+  Navigation
 } from "lucide-react";
 import { 
   Accordion,
