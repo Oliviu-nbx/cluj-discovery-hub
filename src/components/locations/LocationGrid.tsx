@@ -4,9 +4,26 @@ import { Location } from "@/services/dataService";
 
 interface LocationGridProps {
   locations: Location[]; // Use the proper Location type from dataService
+  isLoading?: boolean;
 }
 
-const LocationGrid = ({ locations }: LocationGridProps) => {
+const LocationGrid = ({ locations, isLoading = false }: LocationGridProps) => {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cluj-primary"></div>
+      </div>
+    );
+  }
+  
+  if (!locations || locations.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-xl text-gray-600">No locations found.</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {locations.map((location) => {

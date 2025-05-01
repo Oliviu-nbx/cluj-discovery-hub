@@ -1,14 +1,9 @@
 
 import CategoryCard from "./CategoryCard";
+import { Category } from "@/services/dataService";
 
 interface CategoryGridProps {
-  categories: {
-    id: string;
-    name: string;
-    slug: string;
-    imageUrl: string;
-    count: number;
-  }[];
+  categories: Category[];
 }
 
 const CategoryGrid = ({ categories }: CategoryGridProps) => {
