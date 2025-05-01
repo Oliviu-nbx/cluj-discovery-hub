@@ -541,7 +541,16 @@ export const getCategories = async (): Promise<Category[]> => {
 
 export const getCategoryBySlug = async (slug: string): Promise<Category | null> => {
   await delay(200);
-  return mockCategories.find(cat => cat.slug === slug) || null;
+  console.log(`Looking for category with slug: ${slug}`);
+  console.log(`Available categories:`, mockCategories.map(c => c.slug).join(', '));
+  const category = mockCategories.find(cat => cat.slug === slug);
+  if (category) {
+    console.log(`Found category: ${category.name}`);
+    return category;
+  } else {
+    console.log(`No category found with slug: ${slug}`);
+    return null;
+  }
 };
 
 export const getLocationsByCategory = async (categoryId: string): Promise<Location[]> => {

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { getLocations, getCategories, fetchXMLLocations } from "@/services/dataService";
+import { toast } from "@/components/ui/sonner";
 
 const Index = () => {
   const [filteredLocations, setFilteredLocations] = useState<any[]>([]);
@@ -16,6 +18,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [dataFetched, setDataFetched] = useState(false);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
@@ -23,21 +26,32 @@ const Index = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        console.log("Fetching XML data...");
         // First, fetch XML data to ensure we have the latest locations
         await fetchXMLLocations();
+        console.log("XML data fetched successfully");
         
         // Then get all the locations and categories
+        console.log("Getting locations and categories...");
         const [locationsData, categoriesData] = await Promise.all([
           getLocations(),
           getCategories()
         ]);
         
+        console.log(`Retrieved ${locationsData.length} locations and ${categoriesData.length} categories`);
+        
+        if (locationsData.length === 0) {
+          toast.warning("No locations found. Try refreshing the page.");
+        }
+        
         setAllLocations(locationsData);
         setFilteredLocations(locationsData);
         setCategories(categoriesData);
         setFeaturedCategories(categoriesData.slice(0, 3));
+        setDataFetched(true);
       } catch (error) {
         console.error("Error fetching data:", error);
+        toast.error("Error loading data. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -85,6 +99,7 @@ const Index = () => {
   
   return (
     <MainLayout>
+      {/* Hero Section */}
       <div className="relative bg-cluj-dark text-white">
         <div 
           className="absolute inset-0 overflow-hidden opacity-30"
@@ -127,6 +142,7 @@ const Index = () => {
       {isLoading ? (
         <div className="flex justify-center items-center py-20">
           <Loader2 className="h-10 w-10 animate-spin text-cluj-primary" />
+          <span className="ml-2">Loading location data...</span>
         </div>
       ) : (
         <>
@@ -139,21 +155,27 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              {featuredCategories.map((category) => (
-                <Link key={category.id} to={`/categories/${category.slug}`}>
-                  <div className="relative h-40 rounded-lg overflow-hidden shadow-md">
-                    <img 
-                      src={category.imageUrl} 
-                      alt={category.name}
-                      className="h-full w-full object-cover transform transition-transform hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
-                      <h3 className="text-white text-lg font-medium">{category.name}</h3>
-                      <p className="text-white/80 text-sm">{category.count} locations</p>
+              {featuredCategories.length > 0 ? (
+                featuredCategories.map((category) => (
+                  <Link key={category.id} to={`/categories/${category.slug}`}>
+                    <div className="relative h-40 rounded-lg overflow-hidden shadow-md">
+                      <img 
+                        src={category.imageUrl} 
+                        alt={category.name}
+                        className="h-full w-full object-cover transform transition-transform hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
+                        <h3 className="text-white text-lg font-medium">{category.name}</h3>
+                        <p className="text-white/80 text-sm">{category.count} locations</p>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))
+              ) : (
+                <div className="col-span-3 text-center py-12">
+                  <p className="text-lg text-gray-600">No categories found. Please try again later.</p>
+                </div>
+              )}
             </div>
           </div>
           
@@ -165,17 +187,15 @@ const Index = () => {
               onCategorySelect={handleCategorySelect} 
             />
             
-            {filteredLocations.length > 0 ? (
-              <LocationGrid locations={filteredLocations} />
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-xl text-gray-600">No locations found. Try a different search.</p>
-              </div>
-            )}
+            <LocationGrid 
+              locations={filteredLocations} 
+              isLoading={isLoading && !dataFetched} 
+            />
           </div>
         </>
       )}
       
+      {/* CTA Section */}
       <div className="bg-cluj-primary text-white mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
           <div className="text-center max-w-3xl mx-auto">
